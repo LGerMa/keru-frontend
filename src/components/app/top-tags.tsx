@@ -24,9 +24,10 @@ export function TopTags({ breakdowns }: TopTagsProps) {
         {tagged.map(({ tag, total }) => {
           const pct = grandTotal > 0 ? (total / grandTotal) * 100 : 0;
           return (
-            <div
+            <Link
               key={tag.id}
-              className="flex-shrink-0 rounded-xl p-3 min-w-[90px]"
+              href={`/expenses?tag=${encodeURIComponent(tag.name)}`}
+              className="flex-shrink-0 rounded-xl p-3 min-w-[90px] active:opacity-70 transition-opacity"
               style={{ backgroundColor: `${tag.color}20` }}
             >
               <p className="text-xs font-medium" style={{ color: tag.color }}>
@@ -38,7 +39,7 @@ export function TopTags({ breakdowns }: TopTagsProps) {
               <p className="text-xs text-muted-foreground mt-0.5">
                 {pct.toFixed(0)}%
               </p>
-            </div>
+            </Link>
           );
         })}
       </div>

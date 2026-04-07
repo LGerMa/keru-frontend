@@ -10,6 +10,8 @@ interface UseExpensesOptions {
   take?: number;
   /** "YYYY-MM" — converted to startDate/endDate for the API */
   month?: string;
+  /** comma-separated tag names */
+  tags?: string;
 }
 
 interface UseExpensesReturn {
@@ -20,7 +22,7 @@ interface UseExpensesReturn {
   refetch: () => void;
 }
 
-export function useExpenses({ page = 1, take = 20, month }: UseExpensesOptions = {}): UseExpensesReturn {
+export function useExpenses({ page = 1, take = 20, month, tags }: UseExpensesOptions = {}): UseExpensesReturn {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [meta, setMeta] = useState<PageMeta | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,6 +43,7 @@ export function useExpenses({ page = 1, take = 20, month }: UseExpensesOptions =
           params.startDate = `${month}-01`;
           params.endDate = `${month}-${String(last).padStart(2, "0")}`;
         }
+        if (tags) params.tags = tags;
         const res = await api.get<PaginatedResponse<Expense>>("/v1/expenses", params);
         if (cancelled) return;
         setExpenses(res.items);
@@ -54,7 +57,7 @@ export function useExpenses({ page = 1, take = 20, month }: UseExpensesOptions =
 
     load();
     return () => { cancelled = true; };
-  }, [page, take, month, tick]);
+  }, [page, take, month, tags, tick]);
 
   return {
     expenses,

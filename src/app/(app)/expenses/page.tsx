@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useExpenses } from "@/hooks/use-expenses";
 import { useIncome } from "@/hooks/use-income";
 import { TransactionItem } from "@/components/app/transaction-item";
@@ -12,11 +13,15 @@ import { currentMonth, formatMonth } from "@/lib/utils";
 type Tab = "expenses" | "income";
 
 export default function HistoryPage() {
+  const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>("expenses");
   const [month, setMonth] = useState<string>(currentMonth());
+  const [tagFilter, setTagFilter] = useState<string>(
+    () => searchParams.get("tag") ?? ""
+  );
 
   const { expenses, meta: expMeta, isLoading: expLoading, error: expError } =
-    useExpenses({ month });
+    useExpenses({ month, tags: tagFilter || undefined });
   const { income, meta: incMeta, isLoading: incLoading, error: incError } =
     useIncome({ month });
 
@@ -60,8 +65,22 @@ export default function HistoryPage() {
         ))}
       </div>
 
+      {/* Active tag filter */}
+      {tagFilter && (
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-xs text-muted-foreground">Filtered by:</span>
+          <button
+            onClick={() => setTagFilter("")}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary"
+          >
+            {tagFilter}
+            <X size={11} />
+          </button>
+        </div>
+      )}
+
       {/* Month picker */}
-      <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-none">
+      <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-1 scrollbar-none">
         {Array.from({ length: 6 }, (_, i) => {
           const d = new Date();
           d.setMonth(d.getMonth() - i);
