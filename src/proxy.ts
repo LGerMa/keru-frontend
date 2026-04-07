@@ -27,11 +27,13 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // On app.keru.me, redirect landing routes to keru.me
+  // On app.keru.me, / → /dashboard; /pricing → keru.me/pricing
   if (hostname.startsWith("app.")) {
-    if (path === "/" || path.startsWith("/pricing")) {
-      const landingUrl = new URL(path, `https://keru.me`);
-      return NextResponse.redirect(landingUrl);
+    if (path === "/") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+    if (path.startsWith("/pricing")) {
+      return NextResponse.redirect(new URL(path, `https://keru.me`));
     }
   }
 
