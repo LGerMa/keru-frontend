@@ -24,7 +24,6 @@ export function TransactionItem({ transaction }: TransactionItemProps) {
       href={href}
       className="flex items-center gap-3 py-3 border-b last:border-0"
     >
-      {/* Color dot */}
       <span
         className="w-2.5 h-2.5 rounded-full flex-shrink-0"
         style={{ backgroundColor: primaryTag?.color ?? "#6B7280" }}

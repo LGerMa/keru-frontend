@@ -1,4 +1,5 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5005";
+export const API_URL = `${BASE_URL}/api`;
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001";
 
 export const TAG_COLORS: Record<string, { color: string; background: string }> = {
@@ -13,11 +14,10 @@ export const TAG_COLORS: Record<string, { color: string; background: string }> =
 };
 
 export const PAYMENT_METHODS = [
-  { value: "cash",         label: "Cash" },
-  { value: "credit_card",  label: "Credit Card" },
-  { value: "debit_card",   label: "Debit Card" },
-  { value: "bank_transfer",label: "Bank Transfer" },
-  { value: "other",        label: "Other" },
+  { value: "cash",        label: "Cash" },
+  { value: "debit_card",  label: "Debit Card" },
+  { value: "credit_card", label: "Credit Card" },
+  { value: "transfer",    label: "Transfer" },
 ] as const;
 
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number]["value"];

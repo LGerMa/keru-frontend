@@ -63,9 +63,8 @@ export function setStoredUser(user: User): void {
 // --- Store full auth response ---
 
 export function storeAuthResponse(auth: AuthResponse): void {
-  setAccessToken(auth.access_token);
-  setRefreshToken(auth.refresh_token);
-  setStoredUser(auth.user);
+  setAccessToken(auth.accessToken);
+  setRefreshToken(auth.refreshToken);
 }
 
 // --- Clear all tokens ---

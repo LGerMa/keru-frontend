@@ -38,7 +38,7 @@ export default function DashboardPage() {
   return (
     <div className="pt-6">
       <p className="text-sm text-muted-foreground mb-5">
-        {greeting()}{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
+        {greeting()}{user?.profile?.name ? `, ${user.profile.name.split(" ")[0]}` : ""}
       </p>
 
       {summary && <BalanceCard summary={summary} />}

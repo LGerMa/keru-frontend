@@ -1,27 +1,44 @@
-import type { Tag } from "./tag";
-
 export interface DashboardSummary {
-  month: string;       // "2026-04"
+  month: string;         // "2026-04"
+  totalIncome: number;
+  totalExpenses: number;
   balance: number;
+  expenseCount: number;
+  incomeCount: number;
+}
+
+export interface TagBreakdownTag {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface TagBreakdown {
+  tag: TagBreakdownTag;
+  untagged: boolean;
+  total: number;
+  count: number;
+}
+
+export interface MonthTrend {
+  month: string;         // "2026-04"
   totalIncome: number;
   totalExpenses: number;
 }
 
-export interface TagBreakdown {
-  tag: Tag;
-  amount: number;
-  percentage: number;
+export interface CompareTagMonth {
+  month: string;
+  total: number;
 }
 
-export interface MonthTrend {
-  month: string;       // "2026-04"
-  income: number;
-  expenses: number;
+export interface CompareTagItem {
+  tag: TagBreakdownTag;
+  months: CompareTagMonth[];
+  average: number;
+  trend: "up" | "down" | "stable";
 }
 
 export interface TagComparison {
-  tag: Tag;
-  currentMonth: number;
-  previousMonth: number;
-  change: number;      // percentage change
+  period: { from: string; to: string };
+  tags: CompareTagItem[];
 }

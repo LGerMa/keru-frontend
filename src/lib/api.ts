@@ -24,7 +24,7 @@ async function refreshAccessToken(): Promise<string> {
   const res = await fetch(`${API_URL}/auth/refresh`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh_token: refreshToken }),
+    body: JSON.stringify({ refreshToken }),
   });
 
   if (!res.ok) {
@@ -34,9 +34,9 @@ async function refreshAccessToken(): Promise<string> {
   }
 
   const data: AuthResponse = await res.json();
-  setAccessToken(data.access_token);
-  setRefreshToken(data.refresh_token);
-  return data.access_token;
+  setAccessToken(data.accessToken);
+  setRefreshToken(data.refreshToken);
+  return data.accessToken;
 }
 
 async function request<T>(

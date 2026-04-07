@@ -26,8 +26,8 @@ function shortMonth(month: string): string {
 export function TrendsChart({ trends }: TrendsChartProps) {
   const data = trends.map((t) => ({
     month: shortMonth(t.month),
-    income: t.income,
-    expenses: t.expenses,
+    income: t.totalIncome,
+    expenses: t.totalExpenses,
   }));
 
   return (

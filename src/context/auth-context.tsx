@@ -6,9 +6,10 @@ import {
   storeAuthResponse,
   clearTokens,
   getStoredUser,
+  setStoredUser,
   isAuthenticated as checkIsAuthenticated,
 } from "@/lib/auth";
-import type { User, LoginRequest, RegisterRequest, AuthResponse } from "@/types/auth";
+import type { User, AuthResponse } from "@/types/auth";
 
 interface AuthContextValue {
   user: User | null;
@@ -17,6 +18,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -26,30 +28,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Restore user from storage on mount
     if (checkIsAuthenticated()) {
-      setUser(getStoredUser());
+      const stored = getStoredUser();
+      if (stored) {
+        setUser(stored);
+        setIsLoading(false);
+      } else {
+        // Tokens exist but no cached user — fetch from API
+        api.get<User>("/v1/users/me")
+          .then((u) => { setStoredUser(u); setUser(u); })
+          .catch(() => clearTokens())
+          .finally(() => setIsLoading(false));
+      }
+    } else {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
+  async function fetchAndStoreUser(): Promise<User> {
+    const u = await api.get<User>("/v1/users/me");
+    setStoredUser(u);
+    setUser(u);
+    return u;
+  }
+
   async function login(email: string, password: string): Promise<void> {
-    const data = await api.post<AuthResponse>("/auth/login", {
-      email,
-      password,
-    } satisfies LoginRequest);
+    const data = await api.post<AuthResponse>("/auth/login", { email, password });
     storeAuthResponse(data);
-    setUser(data.user);
+    await fetchAndStoreUser();
   }
 
   async function register(name: string, email: string, password: string): Promise<void> {
-    const data = await api.post<AuthResponse>("/auth/register", {
-      name,
-      email,
-      password,
-    } satisfies RegisterRequest);
+    const data = await api.post<AuthResponse>("/auth/register", { email, password });
     storeAuthResponse(data);
-    setUser(data.user);
+    // Set name after registration (API register only accepts email + password)
+    if (name.trim()) {
+      await api.patch("/v1/users/me", { name: name.trim() });
+    }
+    await fetchAndStoreUser();
   }
 
   async function logout(): Promise<void> {
@@ -63,6 +79,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  async function refreshUser(): Promise<void> {
+    await fetchAndStoreUser();
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -72,6 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         register,
         logout,
+        refreshUser,
       }}
     >
       {children}

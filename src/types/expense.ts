@@ -1,29 +1,37 @@
-import type { Tag } from "./tag";
 import type { PaymentMethod } from "@/lib/constants";
+
+export interface ExpenseTag {
+  id: string;
+  name: string;
+  color: string;
+}
 
 export interface Expense {
   id: string;
   amount: number;
-  description?: string;
-  tags: Tag[];
-  date: string;
   paymentMethod: PaymentMethod;
+  description: string | null;
+  date: string;
+  source: "web" | "whatsapp";
+  receiptUrl: string | null;
+  tags: ExpenseTag[];
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface CreateExpenseDto {
   amount: number;
-  description?: string;
-  tagIds: string[];
-  date: string;
   paymentMethod: PaymentMethod;
+  date: string;
+  description?: string;
+  tagIds?: string[];
+  receiptUrl?: string;
 }
 
 export interface UpdateExpenseDto {
   amount?: number;
+  paymentMethod?: PaymentMethod;
+  date?: string;
   description?: string;
   tagIds?: string[];
-  date?: string;
-  paymentMethod?: PaymentMethod;
+  receiptUrl?: string;
 }

@@ -36,16 +36,16 @@ export function useDashboard(month?: string): DashboardData {
       setError(null);
       try {
         const [s, tags, t, expenses] = await Promise.all([
-          api.get<DashboardSummary>("/dashboard/summary", { month: m }),
-          api.get<TagBreakdown[]>("/dashboard/by-tags", { month: m }),
-          api.get<MonthTrend[]>("/dashboard/trends", { months: 6 }),
-          api.get<PaginatedResponse<Expense>>("/expenses", { limit: 5, sort: "date:desc" }),
+          api.get<DashboardSummary>("/v1/dashboard/summary", { month: m }),
+          api.get<TagBreakdown[]>("/v1/dashboard/by-tags", { month: m }),
+          api.get<MonthTrend[]>("/v1/dashboard/trends", { months: 6 }),
+          api.get<PaginatedResponse<Expense>>("/v1/expenses", { page: 1, take: 5 }),
         ]);
         if (cancelled) return;
         setSummary(s);
         setTagBreakdowns(tags);
         setTrends(t);
-        setRecentExpenses(expenses.data);
+        setRecentExpenses(expenses.items);
       } catch (err) {
         if (!cancelled) setError((err as Error).message);
       } finally {

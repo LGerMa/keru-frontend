@@ -1,8 +1,17 @@
+export interface UserProfile {
+  name: string | null;
+  lastname: string | null;
+  phoneNumber: string | null;
+  phoneVerified: boolean;
+  avatarUrl: string | null;
+  bio: string | null;
+}
+
 export interface User {
   id: string;
-  name: string;
   email: string;
-  bio?: string;
+  emailVerified: boolean;
+  profile: UserProfile;
   createdAt: string;
 }
 
@@ -12,18 +21,15 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  name: string;
   email: string;
   password: string;
 }
 
 export interface AuthResponse {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-  user: User;
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface RefreshRequest {
-  refresh_token: string;
+  refreshToken: string;
 }
