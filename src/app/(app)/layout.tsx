@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { Home, List, Plus, Tag, User } from "lucide-react";
+import { Home, List, Plus, Tag, User, TrendingUp, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [fabOpen, setFabOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -58,14 +59,46 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Link>
         ))}
 
-        {/* FAB — add expense */}
-        <Link
-          href="/expenses/new"
-          className="flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg -mt-4"
-          aria-label="Add expense"
-        >
-          <Plus size={24} />
-        </Link>
+        {/* FAB — add expense or income */}
+        <div className="relative flex items-center justify-center -mt-4">
+          {fabOpen && (
+            <>
+              {/* backdrop */}
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setFabOpen(false)}
+              />
+              {/* options */}
+              <div className="absolute bottom-14 flex flex-col items-center gap-2 z-50">
+                <Link
+                  href="/income/new"
+                  onClick={() => setFabOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium text-white shadow-md whitespace-nowrap"
+                  style={{ backgroundColor: "#22C55E" }}
+                >
+                  <TrendingUp size={14} />
+                  Income
+                </Link>
+                <Link
+                  href="/expenses/new"
+                  onClick={() => setFabOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium text-white shadow-md whitespace-nowrap bg-primary"
+                >
+                  <List size={14} />
+                  Expense
+                </Link>
+              </div>
+            </>
+          )}
+          <button
+            onClick={() => setFabOpen((o) => !o)}
+            className="flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg transition-transform"
+            style={{ transform: fabOpen ? "rotate(45deg)" : "rotate(0deg)" }}
+            aria-label="Add transaction"
+          >
+            <Plus size={24} />
+          </button>
+        </div>
 
         {NAV_ITEMS.slice(2).map(({ href, icon: Icon, label }) => (
           <Link

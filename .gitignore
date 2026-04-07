@@ -42,3 +42,4 @@ next-env.d.ts
 
 # local design docs (sensitive, not for repo)
 DESIGN.md
+CLAUDE.md

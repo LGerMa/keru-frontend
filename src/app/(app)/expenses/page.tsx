@@ -4,25 +4,60 @@ import { useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { useExpenses } from "@/hooks/use-expenses";
+import { useIncome } from "@/hooks/use-income";
 import { TransactionItem } from "@/components/app/transaction-item";
 import { EmptyState } from "@/components/app/empty-state";
 import { currentMonth, formatMonth } from "@/lib/utils";
 
-export default function ExpensesPage() {
+type Tab = "expenses" | "income";
+
+export default function HistoryPage() {
+  const [tab, setTab] = useState<Tab>("expenses");
   const [month, setMonth] = useState<string>(currentMonth());
-  const { expenses, meta, isLoading, error } = useExpenses({ month });
+
+  const { expenses, meta: expMeta, isLoading: expLoading, error: expError } =
+    useExpenses({ month });
+  const { income, meta: incMeta, isLoading: incLoading, error: incError } =
+    useIncome({ month });
+
+  const isLoading = tab === "expenses" ? expLoading : incLoading;
+  const error = tab === "expenses" ? expError : incError;
+  const items = tab === "expenses" ? expenses : income;
+  const meta = tab === "expenses" ? expMeta : incMeta;
+  const addHref = tab === "expenses" ? "/expenses/new" : "/income/new";
+  const addLabel = tab === "expenses" ? "Add expense" : "Add income";
+  const emptyTitle = tab === "expenses" ? "No expenses yet" : "No income yet";
+  const countLabel =
+    tab === "expenses"
+      ? `${meta?.itemCount ?? 0} expense${meta?.itemCount !== 1 ? "s" : ""} this month`
+      : `${meta?.itemCount ?? 0} entr${meta?.itemCount !== 1 ? "ies" : "y"} this month`;
 
   return (
     <div className="pt-6">
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-base font-semibold">Expenses</h1>
-        <Link
-          href="/expenses/new"
-          className="flex items-center gap-1 text-xs text-primary"
-        >
+        <h1 className="text-base font-semibold">History</h1>
+        <Link href={addHref} className="flex items-center gap-1 text-xs text-primary">
           <Plus size={14} />
-          Add
+          {addLabel}
         </Link>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 mb-5 bg-muted rounded-xl p-1">
+        {(["expenses", "income"] as Tab[]).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors capitalize"
+            style={
+              tab === t
+                ? { backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }
+                : { color: "hsl(var(--muted-foreground))" }
+            }
+          >
+            {t === "expenses" ? "Expenses" : "Income"}
+          </button>
+        ))}
       </div>
 
       {/* Month picker */}
@@ -38,7 +73,11 @@ export default function ExpensesPage() {
               className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors"
               style={
                 month === m
-                  ? { backgroundColor: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderColor: "hsl(var(--primary))" }
+                  ? {
+                      backgroundColor: tab === "income" ? "#22C55E" : "hsl(var(--primary))",
+                      color: "#fff",
+                      borderColor: tab === "income" ? "#22C55E" : "hsl(var(--primary))",
+                    }
                   : {}
               }
             >
@@ -56,30 +95,29 @@ export default function ExpensesPage() {
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      {!isLoading && !error && expenses.length === 0 && (
+      {!isLoading && !error && items.length === 0 && (
         <EmptyState
-          title="No expenses yet"
+          title={emptyTitle}
           description={`Nothing recorded for ${formatMonth(month)}`}
           action={
-            <Link href="/expenses/new" className="text-xs text-primary underline underline-offset-4">
-              Add your first expense
+            <Link href={addHref} className="text-xs text-primary underline underline-offset-4">
+              Add now
             </Link>
           }
         />
       )}
 
-      {!isLoading && expenses.length > 0 && (
+      {!isLoading && items.length > 0 && (
         <div>
-          {expenses.map((expense) => (
-            <TransactionItem
-              key={expense.id}
-              transaction={{ kind: "expense", ...expense }}
-            />
-          ))}
+          {tab === "expenses"
+            ? expenses.map((e) => (
+                <TransactionItem key={e.id} transaction={{ kind: "expense", ...e }} />
+              ))
+            : income.map((e) => (
+                <TransactionItem key={e.id} transaction={{ kind: "income", ...e }} />
+              ))}
           {meta && (
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              {meta.itemCount} expense{meta.itemCount !== 1 ? "s" : ""} this month
-            </p>
+            <p className="text-xs text-muted-foreground text-center mt-4">{countLabel}</p>
           )}
         </div>
       )}
