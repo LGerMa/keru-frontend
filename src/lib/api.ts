@@ -33,7 +33,8 @@ async function refreshAccessToken(): Promise<string> {
     throw new Error("Refresh failed");
   }
 
-  const data: AuthResponse = await res.json();
+  const json = await res.json();
+  const data: AuthResponse = json?.data ?? json;
   setAccessToken(data.accessToken);
   setRefreshToken(data.refreshToken);
   return data.accessToken;
@@ -97,7 +98,12 @@ async function request<T>(
   }
 
   if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
+  const json = await res.json();
+  // Unwrap API envelope: { code, message, data } → data
+  if (json !== null && typeof json === "object" && "code" in json && "data" in json) {
+    return json.data as T;
+  }
+  return json as T;
 }
 
 export const api = {
