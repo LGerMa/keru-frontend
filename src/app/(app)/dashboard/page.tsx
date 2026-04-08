@@ -6,6 +6,8 @@ import { BalanceCard } from "@/components/app/balance-card";
 import { TrendsChart } from "@/components/app/trends-chart";
 import { TopTags } from "@/components/app/top-tags";
 import { RecentTransactions } from "@/components/app/recent-transactions";
+import { formatCurrency, formatMonth } from "@/lib/utils";
+import { ArrowDown, ArrowUp, Wallet } from "lucide-react";
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -41,13 +43,53 @@ export default function DashboardPage() {
         {greeting()}{user?.profile?.name ? `, ${user.profile.name.split(" ")[0]}` : ""}
       </p>
 
-      {summary && <BalanceCard summary={summary} />}
+      {/* ── Mobile: stacked balance card ── */}
+      {summary && (
+        <div className="lg:hidden">
+          <BalanceCard summary={summary} />
+        </div>
+      )}
 
-      {trends.length > 0 && <TrendsChart trends={trends} />}
+      {/* ── Desktop: 3-card summary row ── */}
+      {summary && (
+        <div className="hidden lg:grid lg:grid-cols-3 lg:gap-4 lg:mb-6">
+          <div className="rounded-2xl border bg-card p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Wallet size={15} className="text-muted-foreground" />
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">Balance</span>
+            </div>
+            <p className="text-3xl font-semibold">{formatCurrency(summary.balance)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{formatMonth(summary.month)}</p>
+          </div>
+          <div className="rounded-2xl border bg-card p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <ArrowUp size={15} className="text-[#22C55E]" />
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">Income</span>
+            </div>
+            <p className="text-3xl font-semibold text-[#22C55E]">{formatCurrency(summary.totalIncome)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{summary.incomeCount} entr{summary.incomeCount !== 1 ? "ies" : "y"}</p>
+          </div>
+          <div className="rounded-2xl border bg-card p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <ArrowDown size={15} className="text-muted-foreground" />
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">Expenses</span>
+            </div>
+            <p className="text-3xl font-semibold">{formatCurrency(summary.totalExpenses)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{summary.expenseCount} expense{summary.expenseCount !== 1 ? "s" : ""}</p>
+          </div>
+        </div>
+      )}
 
-      {tagBreakdowns.length > 0 && <TopTags breakdowns={tagBreakdowns} />}
-
-      <RecentTransactions expenses={recentExpenses} />
+      {/* ── Desktop: chart + recent side-by-side ── */}
+      <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-6">
+        <div>
+          {trends.length > 0 && <TrendsChart trends={trends} />}
+          {tagBreakdowns.length > 0 && <TopTags breakdowns={tagBreakdowns} />}
+        </div>
+        <div>
+          <RecentTransactions expenses={recentExpenses} />
+        </div>
+      </div>
     </div>
   );
 }
