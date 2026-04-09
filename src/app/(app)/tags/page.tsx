@@ -4,6 +4,13 @@ import { useState } from "react";
 import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useTags, createTag, updateTag, deleteTag } from "@/hooks/use-tags";
+import {
+  useBudgets,
+  useBudgetStatus,
+  createBudget,
+  updateBudget,
+  deleteBudget,
+} from "@/hooks/use-budgets";
 import { EmptyState } from "@/components/app/empty-state";
 import type { Tag } from "@/types/tag";
 
@@ -16,12 +23,22 @@ const PRESET_COLORS = [
 interface TagFormState {
   name: string;
   color: string;
+  budget: string; // string so the input is controlled; "" means no budget
 }
 
-const DEFAULT_FORM: TagFormState = { name: "", color: "#3B82F6" };
+const DEFAULT_FORM: TagFormState = { name: "", color: "#3B82F6", budget: "" };
+
+// Returns bar color based on percentage
+function budgetBarColor(pct: number): string {
+  if (pct >= 100) return "#EF4444"; // red
+  if (pct >= 80) return "#F59E0B";  // amber
+  return "#22C55E";                  // green
+}
 
 export default function TagsPage() {
   const { tags, isLoading, error, refetch } = useTags();
+  const { budgets, refetch: refetchBudgets } = useBudgets();
+  const { statuses, refetch: refetchStatuses } = useBudgetStatus();
 
   // create dialog
   const [showCreate, setShowCreate] = useState(false);
@@ -41,13 +58,25 @@ export default function TagsPage() {
     if (!createForm.name.trim()) { toast.error("Name is required"); return; }
     setIsCreating(true);
     try {
-      await createTag({ name: createForm.name.trim(), color: createForm.color });
-      toast.success("Tag created");
+      const newTag = await createTag({ name: createForm.name.trim(), color: createForm.color });
+      refetch();
       setShowCreate(false);
       setCreateForm(DEFAULT_FORM);
-      refetch();
+      toast.success("Tag created");
+
+      // budget is secondary — separate try/catch
+      const budgetAmount = parseFloat(createForm.budget);
+      if (!isNaN(budgetAmount) && budgetAmount > 0) {
+        try {
+          await createBudget({ tagId: newTag.id, amount: budgetAmount });
+          refetchBudgets();
+          refetchStatuses();
+        } catch {
+          toast.error("Tag created, but could not set budget");
+        }
+      }
     } catch (err) {
-      toast.error((err as Error).message ?? "Could not create tag");
+      toast.error(err instanceof Error ? err.message : "Could not create tag");
     } finally {
       setIsCreating(false);
     }
@@ -55,7 +84,13 @@ export default function TagsPage() {
 
   function openEdit(tag: Tag) {
     setEditingTag(tag);
-    setEditForm({ name: tag.name, color: tag.color });
+    // Pre-fill budget if one exists for this tag
+    const existingBudget = budgets.find((b) => b.tag.id === tag.id);
+    setEditForm({
+      name: tag.name,
+      color: tag.color,
+      budget: existingBudget ? String(existingBudget.amount) : "",
+    });
   }
 
   async function handleEdit(e: React.FormEvent) {
@@ -65,11 +100,30 @@ export default function TagsPage() {
     setIsSaving(true);
     try {
       await updateTag(editingTag.id, { name: editForm.name.trim(), color: editForm.color });
-      toast.success("Tag updated");
-      setEditingTag(null);
       refetch();
+      setEditingTag(null);
+      toast.success("Tag updated");
+
+      // budget mutations are secondary — separate try/catch
+      const existingBudget = budgets.find((b) => b.tag.id === editingTag.id);
+      const budgetAmount = parseFloat(editForm.budget);
+      const hasBudgetValue = !isNaN(budgetAmount) && budgetAmount > 0;
+
+      try {
+        if (hasBudgetValue && !existingBudget) {
+          await createBudget({ tagId: editingTag.id, amount: budgetAmount });
+        } else if (hasBudgetValue && existingBudget) {
+          await updateBudget(existingBudget.id, { amount: budgetAmount });
+        } else if (!hasBudgetValue && existingBudget) {
+          await deleteBudget(existingBudget.id);
+        }
+        refetchBudgets();
+        refetchStatuses();
+      } catch {
+        toast.error("Tag updated, but could not save budget");
+      }
     } catch (err) {
-      toast.error((err as Error).message ?? "Could not update tag");
+      toast.error(err instanceof Error ? err.message : "Could not update tag");
     } finally {
       setIsSaving(false);
     }
@@ -80,6 +134,8 @@ export default function TagsPage() {
     try {
       await deleteTag(id);
       toast.success("Tag deleted");
+      refetchBudgets();
+      refetchStatuses();
       refetch();
     } catch (err) {
       toast.error((err as Error).message ?? "Could not delete tag");
@@ -100,6 +156,60 @@ export default function TagsPage() {
           New tag
         </button>
       </div>
+
+      {/* Budget status section */}
+      {statuses.length > 0 && (
+        <div className="bg-card rounded-2xl shadow-card-md border border-border p-4 mb-5">
+          <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-muted-foreground">
+            Budgets this month
+          </p>
+          <div className="flex flex-col gap-4">
+            {statuses.map((status) => {
+              const pct = Math.min(status.percentage, 100);
+              const barColor = budgetBarColor(status.percentage);
+              const isOver = status.percentage >= 100;
+              const isWarning = status.percentage >= 80 && status.percentage < 100;
+
+              return (
+                <div key={status.tag.id}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: status.tag.color }}
+                      />
+                      <span
+                        className={`text-sm font-medium ${isOver ? "text-destructive" : ""}`}
+                      >
+                        {status.tag.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-muted-foreground">
+                        ${status.spent.toFixed(2)} / ${status.budget.toFixed(2)}
+                      </span>
+                      <span
+                        className="text-xs font-semibold"
+                        style={{
+                          color: isOver ? "#EF4444" : isWarning ? "#F59E0B" : "#22C55E",
+                        }}
+                      >
+                        {Math.round(status.percentage)}%
+                      </span>
+                    </div>
+                  </div>
+                  <div className="bg-muted rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{ width: `${pct}%`, backgroundColor: barColor }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {isLoading && (
         <div className="flex justify-center pt-10">
@@ -264,6 +374,19 @@ function TagForm({
             {form.name || "Preview"}
           </span>
         </div>
+      </div>
+
+      <div>
+        <label className="text-xs text-muted-foreground mb-1 block">Budget (optional)</label>
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="No budget"
+          value={form.budget}
+          onChange={(e) => onChange({ ...form, budget: e.target.value })}
+          className="w-full border rounded-xl px-4 py-3 text-sm bg-transparent focus:outline-none focus:ring-2 focus:ring-primary"
+        />
       </div>
 
       <div className="flex gap-3 mt-1">
