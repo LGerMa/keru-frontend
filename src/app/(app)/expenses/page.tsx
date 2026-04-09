@@ -45,21 +45,25 @@ export default function HistoryPage() {
       ? `${count} ${count === 1 ? "expense" : "expenses"} this month`
       : `${count} ${count === 1 ? "entry" : "entries"} this month`;
 
-  // ── Shared filter controls (used in both mobile and desktop sidebar) ──
+  const isIncome = tab === "income";
+
   const FilterControls = (
     <>
-      {/* Tabs */}
-      <div className="flex gap-1 mb-5 bg-muted rounded-xl p-1">
+      {/* Tab switcher */}
+      <div className="flex gap-1 mb-5 bg-card rounded-xl p-1 border border-border">
         {(["expenses", "income"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors capitalize"
-            style={
+            className={cn(
+              "flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors capitalize",
               tab === t
-                ? { backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }
-                : { color: "hsl(var(--muted-foreground))" }
-            }
+                ? t === "income"
+                  ? "text-white"
+                  : "bg-primary text-primary-foreground"
+                : "text-muted-foreground"
+            )}
+            style={tab === t && t === "income" ? { backgroundColor: "#22C55E" } : {}}
           >
             {t === "expenses" ? "Expenses" : "Income"}
           </button>
@@ -72,7 +76,7 @@ export default function HistoryPage() {
           <span className="text-xs text-muted-foreground">Filtered by:</span>
           <button
             onClick={() => setTagFilter("")}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary"
           >
             {tagFilter}
             <X size={11} />
@@ -82,20 +86,20 @@ export default function HistoryPage() {
 
       {/* Month picker */}
       <div>
-        <p className="text-xs text-muted-foreground mb-2 hidden lg:block">Month</p>
-        {/* Mobile: horizontal scroll */}
+        <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-2 hidden lg:block">Month</p>
+        {/* Mobile: horizontal scroll pill chips */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none lg:hidden">
           {MONTHS.map((m) => {
             const isSelected = month === m;
-            const isIncome = tab === "income";
             return (
               <button
                 key={m}
                 onClick={() => setMonth(m)}
                 className={cn(
-                  "flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
-                  isSelected && !isIncome && "bg-primary text-white border-primary",
-                  isSelected && isIncome && "text-white border-transparent",
+                  "flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors",
+                  isSelected && !isIncome && "bg-primary text-primary-foreground border-primary",
+                  isSelected && isIncome && "border-transparent text-white",
+                  !isSelected && "bg-card text-muted-foreground border-border"
                 )}
                 style={isSelected && isIncome ? { backgroundColor: "#22C55E", borderColor: "#22C55E" } : {}}
               >
@@ -108,13 +112,12 @@ export default function HistoryPage() {
         <div className="hidden lg:flex lg:flex-col lg:gap-1">
           {MONTHS.map((m) => {
             const isSelected = month === m;
-            const isIncome = tab === "income";
             return (
               <button
                 key={m}
                 onClick={() => setMonth(m)}
                 className={cn(
-                  "w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition-colors",
+                  "w-full text-left px-3 py-2 rounded-full text-sm font-medium transition-colors",
                   isSelected && !isIncome && "bg-primary text-primary-foreground",
                   isSelected && isIncome && "text-white",
                   !isSelected && "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -130,86 +133,28 @@ export default function HistoryPage() {
     </>
   );
 
-  return (
-    <div className="pt-6">
-      {/* ── Page header ── */}
-      <div className="flex items-center justify-between mb-5">
-        <h1 className="text-base font-semibold lg:text-lg">History</h1>
-        <Link href={addHref} className="flex items-center gap-1 text-xs text-primary lg:text-sm">
-          <Plus size={14} />
-          {addLabel}
-        </Link>
-      </div>
-
-      {/* ── Mobile layout: filters above list ── */}
-      <div className="lg:hidden">
-        {FilterControls}
-      </div>
-
-      {/* ── Desktop layout: left filter col + right list ── */}
-      <div className="hidden lg:grid lg:grid-cols-[200px_1fr] lg:gap-8">
-        {/* Sticky filter column */}
-        <div className="sticky top-6 self-start">
-          {FilterControls}
+  const TransactionList = (
+    <>
+      {isLoading && (
+        <div className="flex justify-center pt-10">
+          <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
         </div>
-
-        {/* Transaction list */}
+      )}
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      {!isLoading && !error && items.length === 0 && (
+        <EmptyState
+          title={emptyTitle}
+          description={`Nothing recorded for ${formatMonth(month)}`}
+          action={
+            <Link href={addHref} className="text-xs text-primary font-semibold underline underline-offset-4">
+              Add now
+            </Link>
+          }
+        />
+      )}
+      {!isLoading && items.length > 0 && (
         <div>
-          {isLoading && (
-            <div className="flex justify-center pt-10">
-              <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-            </div>
-          )}
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          {!isLoading && !error && items.length === 0 && (
-            <EmptyState
-              title={emptyTitle}
-              description={`Nothing recorded for ${formatMonth(month)}`}
-              action={
-                <Link href={addHref} className="text-xs text-primary underline underline-offset-4">
-                  Add now
-                </Link>
-              }
-            />
-          )}
-          {!isLoading && items.length > 0 && (
-            <div>
-              {tab === "expenses"
-                ? expenses.map((e) => (
-                    <TransactionItem key={e.id} transaction={{ kind: "expense", ...e }} />
-                  ))
-                : income.map((e) => (
-                    <TransactionItem key={e.id} transaction={{ kind: "income", ...e }} />
-                  ))}
-              {meta && (
-                <p className="text-xs text-muted-foreground text-center mt-4">{countLabel}</p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ── Mobile list (below filters) ── */}
-      <div className="lg:hidden">
-        {isLoading && (
-          <div className="flex justify-center pt-10">
-            <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-          </div>
-        )}
-        {error && <p className="text-sm text-destructive">{error}</p>}
-        {!isLoading && !error && items.length === 0 && (
-          <EmptyState
-            title={emptyTitle}
-            description={`Nothing recorded for ${formatMonth(month)}`}
-            action={
-              <Link href={addHref} className="text-xs text-primary underline underline-offset-4">
-                Add now
-              </Link>
-            }
-          />
-        )}
-        {!isLoading && items.length > 0 && (
-          <div>
+          <div className="bg-card rounded-2xl shadow-card-md px-1 overflow-hidden">
             {tab === "expenses"
               ? expenses.map((e) => (
                   <TransactionItem key={e.id} transaction={{ kind: "expense", ...e }} />
@@ -217,11 +162,37 @@ export default function HistoryPage() {
               : income.map((e) => (
                   <TransactionItem key={e.id} transaction={{ kind: "income", ...e }} />
                 ))}
-            {meta && (
-              <p className="text-xs text-muted-foreground text-center mt-4">{countLabel}</p>
-            )}
           </div>
-        )}
+          {meta && (
+            <p className="text-xs text-muted-foreground text-center mt-4">{countLabel}</p>
+          )}
+        </div>
+      )}
+    </>
+  );
+
+  return (
+    <div className="pt-6">
+      <div className="flex items-center justify-between mb-5">
+        <h1 className="text-lg font-bold tracking-tight">History</h1>
+        <Link href={addHref} className="flex items-center gap-1 text-xs text-primary font-semibold">
+          <Plus size={14} />
+          {addLabel}
+        </Link>
+      </div>
+
+      {/* Mobile */}
+      <div className="lg:hidden">
+        {FilterControls}
+        {TransactionList}
+      </div>
+
+      {/* Desktop */}
+      <div className="hidden lg:grid lg:grid-cols-[200px_1fr] lg:gap-8">
+        <div className="sticky top-6 self-start">
+          {FilterControls}
+        </div>
+        <div>{TransactionList}</div>
       </div>
     </div>
   );

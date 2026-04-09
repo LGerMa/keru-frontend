@@ -64,14 +64,14 @@ export default function ProfilePage() {
   return (
     <div className="pt-6 pb-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-xl font-semibold">Profile</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-lg font-bold tracking-tight">Profile</h1>
         {!editing ? (
           <button
             onClick={startEdit}
-            className="flex items-center gap-1.5 text-sm text-primary font-medium"
+            className="flex items-center gap-1.5 text-sm text-primary font-semibold"
           >
-            <Pencil size={15} />
+            <Pencil size={14} />
             Edit
           </button>
         ) : (
@@ -82,7 +82,7 @@ export default function ProfilePage() {
             <button
               onClick={save}
               disabled={isSaving}
-              className="flex items-center gap-1 text-sm text-primary font-medium disabled:opacity-50"
+              className="flex items-center gap-1 text-sm text-primary font-semibold disabled:opacity-50"
             >
               <Check size={16} />
               {isSaving ? "Saving…" : "Save"}
@@ -91,44 +91,48 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Avatar */}
-      <div className="flex flex-col items-center mb-8">
-        <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-semibold mb-3">
+      {/* Avatar card row — Option B */}
+      <div className="bg-card rounded-2xl shadow-card-md border border-border p-4 flex items-center gap-4 mb-5">
+        <div
+          className="w-14 h-14 flex-shrink-0 flex items-center justify-center gradient-hero text-white text-xl font-extrabold shadow-colored"
+          style={{ borderRadius: "14px" }}
+        >
           {initials}
         </div>
-        {!editing && (
-          <>
-            <p className="text-lg font-medium">{displayName}</p>
-            <p className="text-sm text-muted-foreground">{user.email}</p>
-          </>
-        )}
+        <div>
+          <p className="text-base font-bold text-foreground">{displayName}</p>
+          <p className="text-xs text-muted-foreground">{user.email}</p>
+          <p className="text-xs text-primary font-medium mt-0.5">
+            Member since {new Date(user.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+          </p>
+        </div>
       </div>
 
       {/* Fields */}
       {editing ? (
         <div className="space-y-4">
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">First name</label>
+            <label className="text-xs text-muted-foreground mb-1 block font-medium">First name</label>
             <input
-              className="w-full border rounded-xl px-4 py-3 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-primary/30"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="First name"
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Last name</label>
+            <label className="text-xs text-muted-foreground mb-1 block font-medium">Last name</label>
             <input
-              className="w-full border rounded-xl px-4 py-3 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-primary/30"
               value={lastname}
               onChange={(e) => setLastname(e.target.value)}
               placeholder="Last name"
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Bio</label>
+            <label className="text-xs text-muted-foreground mb-1 block font-medium">Bio</label>
             <textarea
-              className="w-full border rounded-xl px-4 py-3 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
               rows={3}
               value={bio}
               onChange={(e) => setBio(e.target.value)}
@@ -137,32 +141,22 @@ export default function ProfilePage() {
           </div>
         </div>
       ) : (
-        <div className="space-y-1">
-          <InfoRow label="Email" value={user.email} />
+        <div className="bg-card rounded-2xl shadow-card-md border border-border overflow-hidden">
           <InfoRow label="First name" value={user.profile.name ?? "—"} />
           <InfoRow label="Last name" value={user.profile.lastname ?? "—"} />
-          {user.profile.bio && (
-            <InfoRow label="Bio" value={user.profile.bio} />
-          )}
-          <InfoRow
-            label="Member since"
-            value={new Date(user.createdAt).toLocaleDateString("en-US", {
-              month: "long",
-              year: "numeric",
-            })}
-          />
+          {user.profile.bio && <InfoRow label="Bio" value={user.profile.bio} />}
         </div>
       )}
 
-      {/* Logout */}
+      {/* Sign out */}
       {!editing && (
-        <div className="mt-10">
+        <div className="mt-8">
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-destructive/40 text-destructive text-sm font-medium disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-destructive/30 text-destructive text-sm font-semibold disabled:opacity-50"
           >
-            <LogOut size={16} />
+            <LogOut size={15} />
             {isLoggingOut ? "Signing out…" : "Sign out"}
           </button>
         </div>
@@ -173,8 +167,8 @@ export default function ProfilePage() {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between py-3 border-b last:border-0">
-      <span className="text-xs text-muted-foreground w-28 shrink-0 pt-0.5">{label}</span>
+    <div className="flex items-start justify-between px-4 py-3 border-b border-border last:border-0">
+      <span className="text-xs text-muted-foreground font-medium w-28 shrink-0 pt-0.5">{label}</span>
       <span className="text-sm text-right flex-1">{value}</span>
     </div>
   );

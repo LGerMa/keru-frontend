@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { TagPill } from "./tag-pill";
 import type { Expense } from "@/types/expense";
 import type { Income } from "@/types/income";
 
@@ -18,46 +17,36 @@ export function TransactionItem({ transaction }: TransactionItemProps) {
     ? `/expenses/${transaction.id}`
     : `/income/${transaction.id}`;
   const primaryTag = transaction.tags[0];
+  const description = transaction.description ?? (isExpense ? "Expense" : "Income");
+  const badgeLetter = description[0]?.toUpperCase() ?? (isExpense ? "E" : "I");
+  const badgeBg = isExpense ? "rgba(99,102,241,0.10)" : "rgba(34,197,94,0.12)";
+  const badgeColor = isExpense ? "#6366f1" : "#22C55E";
 
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 py-3 border-b last:border-0"
+      className="flex items-center gap-3 py-3 border-b last:border-0 hover:bg-muted/40 transition-colors -mx-1 px-1 rounded-lg"
     >
-      <span
-        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-        style={{ backgroundColor: primaryTag?.color ?? "#6B7280" }}
-      />
+      {/* Icon badge */}
+      <div
+        className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-[10px] text-sm font-bold"
+        style={{ backgroundColor: primaryTag ? `${primaryTag.color}18` : badgeBg, color: primaryTag?.color ?? badgeColor }}
+      >
+        {badgeLetter}
+      </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm truncate">
-          {transaction.description ?? (isExpense ? "Expense" : "Income")}
+        <p className="text-sm font-medium truncate">{description}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {formatDate(transaction.date, { month: "short", day: "numeric" })}
+          {primaryTag && <span> · {primaryTag.name}</span>}
         </p>
-        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-          {transaction.tags.map((tag) => (
-            <TagPill key={tag.id} tag={tag} size="sm" />
-          ))}
-          {isExpense && (
-            <span className="text-xs text-muted-foreground">
-              · {(transaction as Expense).paymentMethod.replace("_", " ")}
-            </span>
-          )}
-        </div>
       </div>
 
-      <div className="text-right flex-shrink-0">
-        <p
-          className={`text-sm font-medium ${
-            isExpense ? "text-foreground" : "text-[#22C55E]"
-          }`}
-        >
-          {isExpense ? "-" : "+"}
-          {formatCurrency(transaction.amount)}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {formatDate(transaction.date, { month: "short", day: "numeric" })}
-        </p>
-      </div>
+      <p className={`text-sm font-bold flex-shrink-0 ${isExpense ? "text-foreground" : "text-[#22C55E]"}`}>
+        {isExpense ? "-" : "+"}
+        {formatCurrency(transaction.amount)}
+      </p>
     </Link>
   );
 }

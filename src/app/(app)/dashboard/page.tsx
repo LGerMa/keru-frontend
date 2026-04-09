@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { BalanceCard } from "@/components/app/balance-card";
@@ -7,7 +8,7 @@ import { TrendsChart } from "@/components/app/trends-chart";
 import { TopTags } from "@/components/app/top-tags";
 import { RecentTransactions } from "@/components/app/recent-transactions";
 import { formatCurrency, formatMonth } from "@/lib/utils";
-import { ArrowDown, ArrowUp, Wallet } from "lucide-react";
+import { Plus, TrendingUp } from "lucide-react";
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -43,39 +44,60 @@ export default function DashboardPage() {
         {greeting()}{user?.profile?.name ? `, ${user.profile.name.split(" ")[0]}` : ""}
       </p>
 
-      {/* ── Mobile: stacked balance card ── */}
+      {/* ── Mobile: hero balance card ── */}
       {summary && (
         <div className="lg:hidden">
           <BalanceCard summary={summary} />
+          {/* Quick action buttons */}
+          <div className="flex gap-3 mb-5">
+            <Link
+              href="/expenses/new"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold shadow-colored"
+            >
+              <Plus size={15} />
+              Expense
+            </Link>
+            <Link
+              href="/income/new"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-card text-foreground text-sm font-semibold border border-border shadow-card-sm"
+            >
+              <TrendingUp size={15} />
+              Income
+            </Link>
+          </div>
         </div>
       )}
 
       {/* ── Desktop: 3-card summary row ── */}
       {summary && (
         <div className="hidden lg:grid lg:grid-cols-3 lg:gap-4 lg:mb-6">
-          <div className="rounded-2xl border bg-card p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Wallet size={15} className="text-muted-foreground" />
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">Balance</span>
-            </div>
-            <p className="text-3xl font-semibold">{formatCurrency(summary.balance)}</p>
-            <p className="text-xs text-muted-foreground mt-1">{formatMonth(summary.month)}</p>
+          {/* Balance — indigo gradient */}
+          <div className="gradient-hero rounded-2xl p-5 shadow-hero">
+            <p className="text-xs text-white/60 uppercase tracking-widest font-medium mb-2">Balance</p>
+            <p className="text-3xl font-extrabold text-white" style={{ letterSpacing: "-1px" }}>
+              {formatCurrency(summary.balance)}
+            </p>
+            <p className="text-xs text-white/50 mt-1">{formatMonth(summary.month)}</p>
           </div>
-          <div className="rounded-2xl border bg-card p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <ArrowUp size={15} className="text-[#22C55E]" />
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">Income</span>
-            </div>
-            <p className="text-3xl font-semibold text-[#22C55E]">{formatCurrency(summary.totalIncome)}</p>
-            <p className="text-xs text-muted-foreground mt-1">{summary.incomeCount} entr{summary.incomeCount !== 1 ? "ies" : "y"}</p>
+          {/* Income */}
+          <div className="rounded-2xl bg-card p-5 shadow-card-md border border-border">
+            <p className="text-xs text-muted-foreground uppercase tracking-widest font-medium mb-2">Income</p>
+            <p className="text-3xl font-extrabold text-[#22C55E]" style={{ letterSpacing: "-1px" }}>
+              {formatCurrency(summary.totalIncome)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {summary.incomeCount} {summary.incomeCount !== 1 ? "entries" : "entry"}
+            </p>
           </div>
-          <div className="rounded-2xl border bg-card p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <ArrowDown size={15} className="text-muted-foreground" />
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">Expenses</span>
-            </div>
-            <p className="text-3xl font-semibold">{formatCurrency(summary.totalExpenses)}</p>
-            <p className="text-xs text-muted-foreground mt-1">{summary.expenseCount} expense{summary.expenseCount !== 1 ? "s" : ""}</p>
+          {/* Expenses */}
+          <div className="rounded-2xl bg-card p-5 shadow-card-md border border-border">
+            <p className="text-xs text-muted-foreground uppercase tracking-widest font-medium mb-2">Expenses</p>
+            <p className="text-3xl font-extrabold text-foreground" style={{ letterSpacing: "-1px" }}>
+              {formatCurrency(summary.totalExpenses)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {summary.expenseCount} {summary.expenseCount !== 1 ? "expenses" : "expense"}
+            </p>
           </div>
         </div>
       )}

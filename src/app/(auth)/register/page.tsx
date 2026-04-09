@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { ApiClientError } from "@/lib/api";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export default function RegisterPage() {
@@ -38,12 +37,23 @@ export default function RegisterPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="text-center">
-        <h1 className="text-3xl font-semibold tracking-tight">Keru</h1>
-        <p className="text-sm text-muted-foreground mt-1">Keep Expenses Recorded & Understood</p>
+      {/* Brand mark */}
+      <div className="flex flex-col items-center gap-3">
+        <div
+          className="flex items-center justify-center w-12 h-12 gradient-hero text-white text-xl font-extrabold shadow-colored"
+          style={{ borderRadius: "14px" }}
+        >
+          K
+        </div>
+        <div className="text-center">
+          <h1 className="text-2xl font-extrabold tracking-tight">
+            keru<span className="text-primary">.</span>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Keep Expenses Recorded & Understood</p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <Input
           type="text"
           placeholder="Name"
@@ -54,7 +64,7 @@ export default function RegisterPage() {
         />
         <Input
           type="email"
-          placeholder="Email"
+          placeholder="Email address"
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -73,15 +83,19 @@ export default function RegisterPage() {
           <p className="text-sm text-destructive text-center">{error}</p>
         )}
 
-        <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading ? "Creating account…" : "Register"}
-        </Button>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold shadow-colored transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none mt-1"
+        >
+          {isLoading ? "Creating account…" : "Create account"}
+        </button>
       </form>
 
       <p className="text-sm text-center text-muted-foreground">
         Already have an account?{" "}
-        <Link href="/login" className="text-foreground underline underline-offset-4">
-          Login
+        <Link href="/login" className="text-primary font-semibold">
+          Sign in
         </Link>
       </p>
     </div>
