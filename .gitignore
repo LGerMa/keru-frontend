@@ -41,5 +41,8 @@ yarn-error.log*
 next-env.d.ts
 
 # local design docs (sensitive, not for repo)
-DESIGN.md
+#PLAN_DESIGN.md
 CLAUDE.md
+
+# local AI tooling
+.superpowers/

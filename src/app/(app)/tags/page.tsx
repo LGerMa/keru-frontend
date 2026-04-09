@@ -91,10 +91,10 @@ export default function TagsPage() {
   return (
     <div className="pt-6">
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-base font-semibold">Tags</h1>
+        <h1 className="text-lg font-bold tracking-tight">Tags</h1>
         <button
           onClick={() => { setShowCreate(true); setCreateForm(DEFAULT_FORM); }}
-          className="flex items-center gap-1 text-xs text-primary"
+          className="flex items-center gap-1 text-xs text-primary font-semibold"
         >
           <Plus size={14} />
           New tag
@@ -125,26 +125,23 @@ export default function TagsPage() {
       )}
 
       {!isLoading && tags.length > 0 && (
-        <div>
+        <div className="flex flex-col gap-2">
           {tags.map((tag) => (
             <div
               key={tag.id}
-              className="flex items-center gap-3 py-3 border-b last:border-0"
+              className="bg-card rounded-2xl shadow-card-sm border border-border flex items-center gap-3 px-4 py-3"
             >
               <span
-                className="w-3 h-3 rounded-full flex-shrink-0"
+                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                 style={{ backgroundColor: tag.color }}
               />
-              <span
-                className="flex-1 text-sm font-medium"
-                style={{ color: tag.color }}
-              >
+              <span className="flex-1 text-sm font-semibold" style={{ color: tag.color }}>
                 {tag.name}
               </span>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => openEdit(tag)}
-                  className="text-muted-foreground"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                   aria-label="Edit"
                 >
                   <Pencil size={15} />

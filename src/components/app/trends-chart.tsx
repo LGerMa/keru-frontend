@@ -31,14 +31,14 @@ export function TrendsChart({ trends }: TrendsChartProps) {
   }));
 
   return (
-    <div className="mb-5">
-      <p className="text-sm font-medium mb-3">Spending trend</p>
+    <div className="mb-5 bg-card rounded-2xl shadow-card-md p-4">
+      <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-3">Spending Trends</p>
       <ResponsiveContainer width="100%" height={140}>
         <BarChart data={data} barGap={2} barCategoryGap="30%">
-          <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
+          <CartesianGrid vertical={false} stroke="rgba(99,102,241,0.1)" />
           <XAxis
             dataKey="month"
-            tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+            tick={{ fontSize: 11, fill: "oklch(0.558 0.042 277)" }}
             axisLine={false}
             tickLine={false}
           />
@@ -48,12 +48,13 @@ export function TrendsChart({ trends }: TrendsChartProps) {
             formatter={(value: any) => formatCurrency(Number(value))}
             contentStyle={{
               fontSize: 12,
-              borderRadius: 8,
-              border: "1px solid hsl(var(--border))",
+              borderRadius: 10,
+              border: "1px solid oklch(0.928 0.028 277)",
+              boxShadow: "0 2px 12px rgba(99,102,241,0.08)",
             }}
           />
-          <Bar dataKey="income" fill="#22C55E" radius={[3, 3, 0, 0]} />
-          <Bar dataKey="expenses" fill="#3B82F6" radius={[3, 3, 0, 0]} />
+          <Bar dataKey="income" fill="#22C55E" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="expenses" fill="#6366f1" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

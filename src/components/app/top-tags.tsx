@@ -15,8 +15,8 @@ export function TopTags({ breakdowns }: TopTagsProps) {
   return (
     <div className="mb-5">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-medium">Top tags</p>
-        <Link href="/tags" className="text-xs text-muted-foreground underline underline-offset-4">
+        <p className="text-xs font-semibold uppercase tracking-wider text-foreground">Top tags</p>
+        <Link href="/tags" className="text-xs text-primary font-semibold">
           See all
         </Link>
       </div>
@@ -27,13 +27,13 @@ export function TopTags({ breakdowns }: TopTagsProps) {
             <Link
               key={tag.id}
               href={`/expenses?tag=${encodeURIComponent(tag.name)}`}
-              className="flex-shrink-0 rounded-xl p-3 min-w-[90px] active:opacity-70 transition-opacity"
-              style={{ backgroundColor: `${tag.color}20` }}
+              className="flex-shrink-0 rounded-xl p-3 min-w-[90px] active:opacity-70 transition-opacity shadow-card-sm"
+              style={{ backgroundColor: `${tag.color}18` }}
             >
-              <p className="text-xs font-medium" style={{ color: tag.color }}>
+              <p className="text-xs font-semibold" style={{ color: tag.color }}>
                 {tag.name}
               </p>
-              <p className="text-sm font-semibold mt-1 text-foreground">
+              <p className="text-sm font-bold mt-1 text-foreground">
                 {formatCurrency(total)}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">

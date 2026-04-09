@@ -36,6 +36,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated) return null;
 
+  const isNavActive = (href: string) =>
+    pathname === href || (pathname.startsWith(href + "/") && !pathname.endsWith("/new"));
+
   const displayName =
     [user?.profile?.name, user?.profile?.lastname].filter(Boolean).join(" ") ||
     user?.email?.split("@")[0] ||
@@ -44,45 +47,31 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen lg:flex">
       {/* ── Desktop sidebar ─────────────────────────────────── */}
-      <aside className="hidden lg:flex lg:flex-col fixed left-0 top-0 h-screen w-60 border-r bg-background z-50 px-4 py-6">
+      <aside className="hidden lg:flex lg:flex-col fixed left-0 top-0 h-screen w-60 border-r bg-card z-50 px-4 py-6">
         {/* Logo */}
         <div className="mb-8 px-2">
-          <span className="text-xl font-bold tracking-tight text-primary">Keru</span>
+          <span className="text-xl font-extrabold tracking-tight text-foreground">
+            keru<span className="text-primary">.</span>
+          </span>
         </div>
 
         {/* New transaction */}
-        <div className="relative mb-6">
-          <button
-            onClick={() => setFabOpen((o) => !o)}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium transition-transform hover:scale-105 active:scale-95"
+        <div className="flex gap-2 mb-6">
+          <Link
+            href="/income/new"
+            className="flex flex-1 items-center justify-center gap-1.5 py-2.5 rounded-full text-sm font-semibold text-white shadow-card-md transition-transform hover:scale-105 active:scale-95"
+            style={{ backgroundColor: "#22C55E" }}
           >
-            <Plus size={16} />
-            New transaction
-          </button>
-          {fabOpen && (
-            <>
-              <button className="fixed inset-0 z-40 cursor-default" aria-label="Close menu" onClick={() => setFabOpen(false)} />
-              <div className="absolute top-full left-0 right-0 mt-2 flex flex-col gap-1.5 z-50">
-                <Link
-                  href="/income/new"
-                  onClick={() => setFabOpen(false)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium text-white shadow-md"
-                  style={{ backgroundColor: "#22C55E" }}
-                >
-                  <TrendingUp size={15} />
-                  Income
-                </Link>
-                <Link
-                  href="/expenses/new"
-                  onClick={() => setFabOpen(false)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium text-white shadow-md bg-primary"
-                >
-                  <List size={15} />
-                  Expense
-                </Link>
-              </div>
-            </>
-          )}
+            <TrendingUp size={15} />
+            Income
+          </Link>
+          <Link
+            href="/expenses/new"
+            className="flex flex-1 items-center justify-center gap-1.5 py-2.5 rounded-full text-sm font-semibold text-white shadow-colored bg-primary transition-transform hover:scale-105 active:scale-95"
+          >
+            <List size={15} />
+            Expense
+          </Link>
         </div>
 
         {/* Nav links */}
@@ -92,9 +81,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                pathname.startsWith(href)
-                  ? "bg-primary/10 text-primary"
+                "flex items-center gap-3 px-3 py-2.5 rounded-full text-sm font-medium transition-all",
+                isNavActive(href)
+                  ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
@@ -108,7 +97,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {displayName && (
           <div className="pt-4 border-t px-2">
             <p className="text-xs text-muted-foreground">Signed in as</p>
-            <p className="text-sm font-medium truncate">{displayName}</p>
+            <p className="text-sm font-semibold truncate">{displayName}</p>
           </div>
         )}
       </aside>
@@ -120,14 +109,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
 
         {/* ── Bottom nav — mobile only ──────────────────────── */}
-        <nav className="lg:hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-background border-t flex items-center justify-around h-16 px-2 z-50">
+        <nav className="lg:hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-card border-t flex items-center justify-around h-16 px-2 z-50">
           {NAV_ITEMS.slice(0, 2).map(({ href, icon: Icon, label }) => (
             <Link
               key={href}
               href={href}
               className={cn(
                 "flex flex-col items-center gap-0.5 text-xs w-14",
-                pathname.startsWith(href) ? "text-primary" : "text-muted-foreground"
+                isNavActive(href) ? "text-primary font-semibold" : "text-muted-foreground"
               )}
             >
               <Icon size={22} />
@@ -135,7 +124,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </Link>
           ))}
 
-          {/* FAB */}
+          {/* FAB — rounded square */}
           <div className="relative flex items-center justify-center -mt-4">
             {fabOpen && (
               <>
@@ -144,7 +133,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <Link
                     href="/income/new"
                     onClick={() => setFabOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium text-white shadow-md whitespace-nowrap"
+                    className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold text-white shadow-card-md whitespace-nowrap"
                     style={{ backgroundColor: "#22C55E" }}
                   >
                     <TrendingUp size={14} />
@@ -153,7 +142,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <Link
                     href="/expenses/new"
                     onClick={() => setFabOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium text-white shadow-md whitespace-nowrap bg-primary"
+                    className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold text-white shadow-colored whitespace-nowrap bg-primary"
                   >
                     <List size={14} />
                     Expense
@@ -163,8 +152,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             )}
             <button
               onClick={() => setFabOpen((o) => !o)}
-              className="flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg transition-transform"
-              style={{ transform: fabOpen ? "rotate(45deg)" : "rotate(0deg)" }}
+              className="flex items-center justify-center w-12 h-12 gradient-hero text-white shadow-hero transition-transform hover:scale-105 active:scale-95"
+              style={{
+                borderRadius: "14px",
+                transform: fabOpen ? "rotate(45deg)" : "rotate(0deg)",
+              }}
               aria-label="Add transaction"
             >
               <Plus size={24} />
@@ -177,7 +169,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               href={href}
               className={cn(
                 "flex flex-col items-center gap-0.5 text-xs w-14",
-                pathname.startsWith(href) ? "text-primary" : "text-muted-foreground"
+                isNavActive(href) ? "text-primary font-semibold" : "text-muted-foreground"
               )}
             >
               <Icon size={22} />
