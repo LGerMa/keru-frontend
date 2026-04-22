@@ -3,15 +3,16 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { Home, List, Plus, Tag, User, TrendingUp } from "lucide-react";
+import { Home, List, Plus, Tag, User, TrendingUp, Repeat2 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", icon: Home, label: "Home" },
-  { href: "/expenses",  icon: List, label: "History" },
-  { href: "/tags",      icon: Tag,  label: "Tags" },
-  { href: "/profile",   icon: User, label: "Profile" },
+  { href: "/dashboard", icon: Home,    label: "Home" },
+  { href: "/expenses",  icon: List,    label: "History" },
+  { href: "/recurring", icon: Repeat2, label: "Recurring" },
+  { href: "/tags",      icon: Tag,     label: "Tags" },
+  { href: "/profile",   icon: User,    label: "Profile" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -115,7 +116,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               key={href}
               href={href}
               className={cn(
-                "flex flex-col items-center gap-0.5 text-xs w-14",
+                "flex flex-col items-center gap-0.5 text-xs w-12",
                 isNavActive(href) ? "text-primary font-semibold" : "text-muted-foreground"
               )}
             >
@@ -168,7 +169,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               key={href}
               href={href}
               className={cn(
-                "flex flex-col items-center gap-0.5 text-xs w-14",
+                "flex flex-col items-center gap-0.5 text-xs w-12",
                 isNavActive(href) ? "text-primary font-semibold" : "text-muted-foreground"
               )}
             >
