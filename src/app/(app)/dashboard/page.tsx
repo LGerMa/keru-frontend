@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { useDashboard } from "@/hooks/use-dashboard";
+import { useBudgetStatus } from "@/hooks/use-budgets";
 import { BalanceCard } from "@/components/app/balance-card";
 import { TrendsChart } from "@/components/app/trends-chart";
 import { TopTags } from "@/components/app/top-tags";
 import { RecentTransactions } from "@/components/app/recent-transactions";
+import { BudgetOverview } from "@/components/app/budget-overview";
 import { formatCurrency, formatMonth } from "@/lib/utils";
 import { Plus, TrendingUp } from "lucide-react";
 
@@ -21,6 +23,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const { summary, tagBreakdowns, trends, recentExpenses, isLoading, error } =
     useDashboard();
+  const { statuses: budgetStatuses } = useBudgetStatus();
 
   if (isLoading) {
     return (
@@ -106,7 +109,8 @@ export default function DashboardPage() {
       <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-6">
         <div>
           {trends.length > 0 && <TrendsChart trends={trends} />}
-          {tagBreakdowns.length > 0 && <TopTags breakdowns={tagBreakdowns} />}
+          {tagBreakdowns.length > 0 && <TopTags breakdowns={tagBreakdowns} budgetStatuses={budgetStatuses} />}
+          <BudgetOverview statuses={budgetStatuses} />
         </div>
         <div>
           <RecentTransactions expenses={recentExpenses} />
