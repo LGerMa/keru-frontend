@@ -505,45 +505,85 @@ The app layout includes:
 
 ### Dashboard (`/dashboard`)
 
-The main screen. Shows financial pulse at a glance.
+The main screen. Follows a **mental investigation flow** — answers "where's your money going?" top to bottom.
+
+**Section order (V2 redesign):**
+
+| Step | Section | Why |
+| ---- | ------- | --- |
+| ① | **Hero balance card** | Balance, income, expenses, savings rate, sparkline, delta badge |
+| ② | **Quick stats strip** | Daily avg, biggest expense, top category, transaction count |
+| ③ | **Category breakdown + Budgets** | The core answer — promoted to primary position |
+| ④ | **Trends chart** | Context after you know the breakdown |
+| ⑤ | **Transactions** | Sortable drill-down (5 columns, paginated 8/page) |
+| ⑥ | **Recurring watchlist** | Committed spend awareness |
 
 ```
 ┌──────────────────────────┐
-│  Good morning, Luis   🔔 │
-│                            │
-│  APRIL 2026                │
-│  $1,247.50  balance        │
-│  ↑ $2,500   ↓ $1,252.50   │
+│  Where's your money going?│
 │                            │
 │  ┌──────────────────────┐ │
-│  │ ▁ ▃ ▂ ▅ ▃ ▂          │ │  ← 6-month spending trend
-│  │ N  D  J  F  M  Apr   │ │
+│  │ APRIL 2026           │ │  ← Hero card (gradient)
+│  │ $1,247.50  balance   │ │
+│  │ ↑ $2,500  ↓ $1,252  │ │
+│  │ ▁▃▂▅▃▂  +14.3% vs M │ │  ← sparkline + delta badge
 │  └──────────────────────┘ │
 │                            │
-│  Top tags          See all │
-│  ┌─────┐┌─────┐┌────────┐│
-│  │food ││trans││subscrip││  ← Horizontal scroll
-│  │$420 ││$285 ││$180    ││
-│  └─────┘└─────┘└────────┘│
+│  ┌────┐┌────┐┌────┐┌────┐│
+│  │$8.5││food││42  ││ 18 ││  ← Quick stats strip
+│  │/day││top ││big ││txns││
+│  └────┘└────┘└────┘└────┘│
 │                            │
-│  Recent              See all│
+│  Spending by category      │
+│  🔴 food      $420  ███ Over│
+│  🟡 transport $285  ██  Near│
+│  🔵 subscr.   $180  █       │
+│                            │
+│  ┌──────────────────────┐ │
+│  │ ▁ ▃ ▂ ▅ ▃ ▂          │ │  ← Trends chart
+│  └──────────────────────┘ │
+│                            │
+│  Transactions (sortable)   │
 │  🔴 Pollo Campero   -$8.50│
 │  🟡 Uber to work    -$3.25│
 │  🟢 Monthly salary +$2,500│
+│                            │
+│  Recurring                 │
+│  Netflix  $6.99  3 days    │
 │                            │
 ├────────────────────────────┤
 │ Home History [+] Tags Prof │
 └────────────────────────────┘
 ```
 
-**Components used:** `balance-card`, `trends-chart`, `top-tags`, `recent-transactions`, `transaction-item`
+**Hero card details:**
+- Gradient background (`gradient-hero`)
+- Sparkline (6-month expense mini-chart) inline
+- Balance delta badge vs previous month (e.g. "+14.3% vs March")
+- Income in `#22C55E` emerald, expenses in white/80
+
+**Quick stats strip (4 cards):**
+- Daily average spend
+- Largest single expense of the month
+- Top category name + amount
+- Total transaction count
+
+**Transactions table:**
+- All 5 columns sortable: Date, Description, Category, Method, Amount
+- Paginated — 8 rows per page
+- Tag badges use color tint for instant scanning
+
+**Components used:** `hero-card`, `quick-stats`, `category-donut`, `budget-overview`, `trends-chart`, `transactions-table`, `recurring-watchlist`
 
 **API calls:**
 
 - `GET /dashboard/summary?month=2026-04`
 - `GET /dashboard/by-tags?month=2026-04`
 - `GET /dashboard/trends?months=6`
-- `GET /expenses?limit=5&sort=date:desc`
+- `GET /dashboard/insights?month=2026-04` *(quick stats)*
+- `GET /expenses?limit=8&sort=date:desc`
+- `GET /budgets/status`
+- `GET /recurring`
 
 ### Add Expense (`/expenses/new`)
 
@@ -704,23 +744,30 @@ Fast entry form — the most critical screen.
 
 ### Core App Components
 
-| Component               | Description                                            | Used in             |
-| ----------------------- | ------------------------------------------------------ | ------------------- |
-| `bottom-nav`            | 5-tab navigation with floating "+" button              | App layout          |
-| `balance-card`          | Monthly balance with income/expense arrows             | Dashboard           |
-| `trends-chart`          | 6-month bar chart (Recharts)                           | Dashboard           |
-| `top-tags`              | Horizontal scrollable tag spending cards               | Dashboard           |
-| `recent-transactions`   | Last N transactions list                               | Dashboard           |
-| `transaction-item`      | Single transaction row (color dot, desc, tags, amount) | History, Dashboard  |
-| `expense-form`          | Amount, description, tags, date, payment method        | Add/Edit expense    |
-| `income-form`           | Amount, description, tags, date, type                  | Add/Edit income     |
-| `tag-pill`              | Colored tag badge                                      | Everywhere          |
-| `tag-selector`          | Grid of tappable tag pills for selection               | Expense/Income form |
-| `tag-bar`               | Tag name + spending amount + progress bar              | Tags page           |
-| `date-picker`           | Date selector wrapping shadcn calendar                 | Forms               |
-| `payment-method-select` | Cash / Debit / Credit / Transfer selector              | Expense form        |
-| `filter-bar`            | Search input + filter button                           | History             |
-| `empty-state`           | Illustration + message for empty lists                 | All list pages      |
+| Component               | Description                                                        | Used in             |
+| ----------------------- | ------------------------------------------------------------------ | ------------------- |
+| `bottom-nav`            | 5-tab navigation with floating "+" button                          | App layout          |
+| `balance-card`          | Monthly balance with income/expense arrows                         | Dashboard (mobile)  |
+| `hero-card`             | Gradient hero with sparkline + delta badge (V2)                    | Dashboard           |
+| `quick-stats`           | 4-card strip: daily avg, biggest expense, top category, tx count   | Dashboard           |
+| `category-donut`        | SVG donut + legend for spending by category, clickable segments/legend with hover tooltip | Dashboard |
+| `tag-transactions-modal`| Modal listing a tag's transactions for the selected month (opened from `category-donut`) | Dashboard |
+| `transactions-table`    | Sortable + paginated table (5 cols, 8/page)                        | Dashboard           |
+| `recurring-watchlist`   | Upcoming recurring entries with status badges                      | Dashboard           |
+| `budget-overview`       | Budget progress bars per tag (amber at 80%, red at 100%)           | Dashboard, Tags     |
+| `trends-chart`          | 6-month bar chart (Recharts)                                       | Dashboard           |
+| `top-tags`              | Horizontal scrollable tag spending cards                           | Dashboard           |
+| `recent-transactions`   | Last N transactions list                                           | Dashboard           |
+| `transaction-item`      | Single transaction row (color dot, desc, tags, amount)             | History, Dashboard  |
+| `expense-form`          | Amount, description, tags, date, payment method                    | Add/Edit expense    |
+| `income-form`           | Amount, description, tags, date, type                              | Add/Edit income     |
+| `tag-pill`              | Colored tag badge                                                  | Everywhere          |
+| `tag-selector`          | Grid of tappable tag pills for selection                           | Expense/Income form |
+| `tag-bar`               | Tag name + spending amount + progress bar                          | Tags page           |
+| `date-picker`           | Date selector wrapping shadcn calendar                             | Forms               |
+| `payment-method-select` | Cash / Debit / Credit / Transfer selector                          | Expense form        |
+| `filter-bar`            | Search input + filter button                                       | History             |
+| `empty-state`           | Illustration + message for empty lists                             | All list pages      |
 
 ### shadcn/ui Components to Install
 
@@ -942,17 +989,23 @@ True two-panel layout. The bottom nav moves to a left sidebar.
 
 **Sidebar nav items:**
 ```
-[Keru logo]
+[keru.]
+
+[Income ↑]  [Expense ↓]    ← green / indigo quick-add buttons
 
 🏠  Dashboard
 📋  History
 🏷️  Tags
+🔁  Recurring
 👤  Profile
 
 ───────────
-[Avatar] Luis
-         [+ New]
+[Avatar] Luis  ⚙
 ```
+
+- Nav items use `rounded-full` pill — active = `bg-primary text-primary-foreground`, inactive = `text-muted-foreground`
+- Income/Expense quick-add buttons always visible below logo
+- User avatar + settings icon pinned to bottom
 
 ---
 
@@ -1055,7 +1108,56 @@ Hero headline scales:
 - [x] Edit name / lastname / bio via `PATCH /v1/users/me` + `refreshUser()`
 - [x] Logout functionality
 
-### Phase 9: Landing Page
+### Phase 9: Budgets ✅
+
+Budget limits per tag, with live spending progress. Surfaced on the Tags page and dashboard.
+
+- [x] Create `types/budget.ts` (`Budget`, `BudgetStatus`, `CreateBudgetDto`, `UpdateBudgetDto`)
+- [x] Create `hooks/use-budgets.ts` (`GET /budgets`, `GET /budgets/status`, `POST`, `PATCH`, `DELETE`)
+- [x] Add budget section to Tags page — list tags with a budget: amount set, amount spent, % used, progress bar (turns amber at 80%, red at 100%)
+- [x] Add "Set budget" action to the tag edit dialog (optional amount field — leave empty to remove budget)
+- [x] Show budget warning badge on dashboard top-tags when a tag exceeds 90% of its budget
+
+### Phase 10: Recurring Entries ✅
+
+Scheduled transactions that repeat on a frequency. New `/recurring` page + nav item.
+
+- [x] Create `types/recurring.ts` (`RecurringEntry`, `CreateRecurringDto`, `UpdateRecurringDto`)
+- [x] Create `hooks/use-recurring.ts` (`GET /recurring`, `POST`, `PATCH`, `DELETE`, `pause`, `resume`)
+- [x] Add `/recurring` route under `(app)` with list page
+- [x] Add "Recurring" nav item to sidebar and mobile bottom nav
+- [x] Build recurring list — group by `entryType` (income / expense), show frequency, next date, active/paused badge
+- [x] Build create/edit form — `entryType`, `amount`, `description`, `tags`, `paymentMethod`, `frequency` (`daily`/`weekly`/`monthly`), `dayOfMonth` or `dayOfWeek`, `nextDate`
+- [x] Pause / resume actions on each item
+
+### Phase 10b: Dashboard Redesign (V2) ✅
+
+Redesigned dashboard following a mental investigation flow — "where's your money going?".
+
+- [x] Reframe page headline: "Where's your money going?" replaces greeting
+- [x] Reorder sections: hero → quick stats → category + budgets → trends → transactions → recurring
+- [x] Enrich hero card — sparkline (6-month mini-chart) + balance delta badge vs previous month
+- [x] Build `quick-stats` component — daily avg, biggest expense, top category, transaction count
+- [x] Build `category-donut` component — SVG donut + legend, budget badges (`Over`, `Near`)
+- [x] Build `transactions-table` — sortable (5 cols), paginated (8/page), tag color tints
+- [x] Build `recurring-watchlist` — upcoming recurring with days-until and status badges
+- [x] Sidebar: Income (green) + Expense (indigo) quick-add buttons; `rounded-full` nav pills; user profile + settings icon at bottom
+- [x] Dark mode — `.dark` class toggle, persisted in `localStorage`
+
+### Phase 10c: Dashboard Month Picker & Category Drill-down ✅
+
+Made the topbar month chip functional and let the category donut drill into a tag's transactions. Also fixed a date-off-by-one bug found along the way.
+
+- [x] Add `MonthProvider` / `useSelectedMonth()` context (`src/context/month-context.tsx`) — selected month shared between the app layout and the dashboard page instead of always defaulting to "now"
+- [x] Replace the static, non-interactive topbar month chip with a working `MonthChip` dropdown (click to open, last 12 months, click-outside/Escape to close)
+- [x] Dashboard page reads the selected month from context — hero card, category breakdown, budgets label, trends, insights, and balance delta all follow the picked month
+- [x] Scope the dashboard's recent-transactions fetch (`useDashboard`) to the selected month's date range instead of always showing the latest 5 overall
+- [x] Stack "Category breakdown" and "Budgets" into full-width rows (was a 2-column grid) — fixes the donut legend truncating category names to 1–2 letters on narrower cards
+- [x] Add `TagTransactionsModal` — clicking a donut segment or legend row opens that tag's transactions for the selected month (reuses `TransactionItem` / `EmptyState`, follows the existing bottom-sheet/centered dialog convention)
+- [x] `CategoryDonut` segments and legend rows accept an optional `onSelectTag` prop to become clickable, with a custom hover tooltip (value-first, tag name + color swatch secondary) and a "lift" effect on the hovered segment synced with the legend
+- [x] Fix `formatDate()` parsing `"YYYY-MM-DD"` as UTC and rendering a day early in timezones behind UTC (also fixed a duplicated inline formatter on the dashboard's mobile transaction list)
+
+### Phase 11: Landing Page
 
 - [ ] Create landing layout (nav + footer)
 - [ ] Build hero section
@@ -1063,7 +1165,7 @@ Hero headline scales:
 - [ ] Build CTA section
 - [ ] Build pricing page (if applicable)
 
-### Phase 10: Polish
+### Phase 12: Polish
 
 - [ ] Loading states on all pages
 - [ ] Error handling and toast notifications
@@ -1107,31 +1209,43 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001    # Development
 - [x] Login
 - [x] Register
 - [x] Dashboard
-- [ ] Add expense
-- [ ] Expense history
-- [ ] Add income
-- [ ] Income history
-- [ ] Tags
-- [ ] Profile
+- [x] Add expense
+- [x] Expense history
+- [x] Add income
+- [x] Income history
+- [x] Tags
+- [x] Profile
+- [x] Budgets (on Tags page + dashboard)
+- [x] Recurring entries
+- [x] Dashboard redesign (V2)
+- [x] Dashboard month picker (topbar chip → shared context)
+- [x] Category drill-down modal
 - [ ] Landing page
 
 ### Components
 
 - [x] Bottom nav
 - [x] Balance card
+- [x] Hero card (V2 — sparkline + delta)
+- [x] Quick stats strip
+- [x] Category donut (clickable, with hover tooltip)
+- [x] Tag transactions modal
+- [x] Transactions table (sortable + paginated)
+- [x] Recurring watchlist
+- [x] Budget overview
 - [x] Trends chart
 - [x] Tag pill
-- [ ] Tag selector
+- [x] Tag selector
 - [x] Transaction item
-- [ ] Expense form
-- [ ] Income form
-- [ ] Filter bar
-- [ ] Empty state
+- [x] Expense form
+- [x] Income form
+- [x] Filter bar
+- [x] Empty state
 
 ---
 
 **END OF FRONTEND DESIGN DOCUMENT**
 
-Last updated: April 5, 2026  
-Version: 1.0  
+Last updated: September 5, 2026  
+Version: 1.3  
 Author: Luis (with Claude assistance)
