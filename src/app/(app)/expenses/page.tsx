@@ -6,6 +6,7 @@ import { Plus, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useExpenses } from "@/hooks/use-expenses";
 import { useIncome } from "@/hooks/use-income";
+import { usePaymentSources } from "@/hooks/use-payment-sources";
 import { TransactionItem } from "@/components/app/transaction-item";
 import { EmptyState } from "@/components/app/empty-state";
 import { currentMonth, formatMonth } from "@/lib/utils";
@@ -26,9 +27,15 @@ export default function HistoryPage() {
   const [tagFilter, setTagFilter] = useState<string>(
     () => searchParams.get("tag") ?? ""
   );
+  const [paymentSourceId, setPaymentSourceId] = useState<string>(
+    () => searchParams.get("paymentSourceId") ?? ""
+  );
+
+  const { paymentSources } = usePaymentSources();
+  const activeSource = paymentSources.find((s) => s.id === paymentSourceId);
 
   const { expenses, meta: expMeta, isLoading: expLoading, error: expError } =
-    useExpenses({ month, tags: tagFilter || undefined });
+    useExpenses({ month, tags: tagFilter || undefined, paymentSourceId: paymentSourceId || undefined });
   const { income, meta: incMeta, isLoading: incLoading, error: incError } =
     useIncome({ month });
 
@@ -81,6 +88,41 @@ export default function HistoryPage() {
             {tagFilter}
             <X size={11} />
           </button>
+        </div>
+      )}
+
+      {/* Payment source filter — expenses tab only */}
+      {tab === "expenses" && paymentSources.length > 0 && (
+        <div className="mb-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-2 hidden lg:block">Payment source</p>
+          {activeSource ? (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs text-muted-foreground lg:hidden">Payment source:</span>
+              <button
+                onClick={() => setPaymentSourceId("")}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                style={{ color: activeSource.color, backgroundColor: `${activeSource.color}1a` }}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: activeSource.color }}
+                />
+                {activeSource.alias}
+                <X size={11} />
+              </button>
+            </div>
+          ) : (
+            <select
+              value={paymentSourceId}
+              onChange={(e) => setPaymentSourceId(e.target.value)}
+              className="w-full lg:w-auto border border-border rounded-full bg-card text-xs font-medium px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              <option value="">All payment sources</option>
+              {paymentSources.map((s) => (
+                <option key={s.id} value={s.id}>{s.alias}</option>
+              ))}
+            </select>
+          )}
         </div>
       )}
 

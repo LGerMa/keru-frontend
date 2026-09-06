@@ -9,6 +9,7 @@ import { useBudgetStatus } from "@/hooks/use-budgets";
 import { useRecurring } from "@/hooks/use-recurring";
 import { useInsights } from "@/hooks/use-insights";
 import { useBalanceDelta } from "@/hooks/use-balance-delta";
+import { usePaymentSources } from "@/hooks/use-payment-sources";
 import { HeroCard } from "@/components/app/hero-card";
 import { QuickStats } from "@/components/app/quick-stats";
 import { CategoryDonut } from "@/components/app/category-donut";
@@ -17,9 +18,12 @@ import { TrendsChart } from "@/components/app/trends-chart";
 import { TransactionsTable } from "@/components/app/transactions-table";
 import { RecurringWatchlist } from "@/components/app/recurring-watchlist";
 import { TagTransactionsModal } from "@/components/app/tag-transactions-modal";
+import { PaymentSourcesCard } from "@/components/app/payment-sources-card";
+import { PaymentSourceTransactionsModal } from "@/components/app/payment-source-transactions-modal";
 import { formatCurrency, formatDate, formatMonth } from "@/lib/utils";
 import { TrendingUp, Plus } from "lucide-react";
 import type { TagBreakdownTag } from "@/types/dashboard";
+import type { PaymentSource } from "@/types/payment-source";
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -93,6 +97,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const { month } = useSelectedMonth();
   const [selectedTag, setSelectedTag] = useState<TagBreakdownTag | null>(null);
+  const [selectedSource, setSelectedSource] = useState<PaymentSource | null>(null);
 
   const {
     summary,
@@ -105,6 +110,7 @@ export default function DashboardPage() {
 
   const { statuses: budgetStatuses } = useBudgetStatus();
   const { entries: recurringEntries } = useRecurring();
+  const { paymentSources } = usePaymentSources();
 
   const insights = useInsights({ summary, tagBreakdowns });
   const { balanceDelta } = useBalanceDelta(trends, month);
@@ -208,6 +214,32 @@ export default function DashboardPage() {
                 <BudgetOverview statuses={budgetStatuses} />
               </Card>
             )}
+          </div>
+        </>
+      )}
+
+      {/* ③b Payment sources — clickable drill-in */}
+      {paymentSources.length > 0 && (
+        <>
+          <SectionHeader
+            label="Payment sources"
+            action={
+              <Link
+                href="/payment-sources"
+                className="text-xs font-semibold text-primary"
+              >
+                Manage →
+              </Link>
+            }
+          />
+          <div className="mb-6">
+            <Card>
+              <p className="text-sm font-bold mb-1">Cards &amp; accounts</p>
+              <p className="text-xs text-muted-foreground mb-4">
+                Tap one to see its {summary ? formatMonth(summary.month) : "this month's"} expenses
+              </p>
+              <PaymentSourcesCard sources={paymentSources} onSelect={setSelectedSource} />
+            </Card>
           </div>
         </>
       )}
@@ -328,6 +360,12 @@ export default function DashboardPage() {
         tag={selectedTag}
         month={month}
         onClose={() => setSelectedTag(null)}
+      />
+
+      <PaymentSourceTransactionsModal
+        source={selectedSource}
+        month={month}
+        onClose={() => setSelectedSource(null)}
       />
 
     </div>

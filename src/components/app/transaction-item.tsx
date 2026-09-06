@@ -17,6 +17,7 @@ export function TransactionItem({ transaction }: TransactionItemProps) {
     ? `/expenses/${transaction.id}`
     : `/income/${transaction.id}`;
   const primaryTag = transaction.tags[0];
+  const paymentSource = isExpense ? transaction.paymentSource : null;
   const description = transaction.description ?? (isExpense ? "Expense" : "Income");
   const badgeLetter = description[0]?.toUpperCase() ?? (isExpense ? "E" : "I");
   const badgeBg = isExpense ? "rgba(99,102,241,0.10)" : "rgba(34,197,94,0.12)";
@@ -40,6 +41,9 @@ export function TransactionItem({ transaction }: TransactionItemProps) {
         <p className="text-xs text-muted-foreground mt-0.5">
           {formatDate(transaction.date, { month: "short", day: "numeric" })}
           {primaryTag && <span> · {primaryTag.name}</span>}
+          {paymentSource && (
+            <span style={{ color: paymentSource.color }}> · {paymentSource.alias}</span>
+          )}
         </p>
       </div>
 
