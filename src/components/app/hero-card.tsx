@@ -68,7 +68,7 @@ function Sparkline({ trends }: { trends: MonthTrend[] }) {
             y={H + 2}
             textAnchor="middle"
             fontSize="9"
-            fill="rgba(255,255,255,0.5)"
+            fill="rgba(255,255,255,0.75)"
             fontFamily="Inter, ui-sans-serif"
           >
             {label}
