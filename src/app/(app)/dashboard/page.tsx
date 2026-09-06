@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
+import { useSelectedMonth } from "@/context/month-context";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { useBudgetStatus } from "@/hooks/use-budgets";
 import { useRecurring } from "@/hooks/use-recurring";
@@ -14,7 +15,7 @@ import { BudgetOverview } from "@/components/app/budget-overview";
 import { TrendsChart } from "@/components/app/trends-chart";
 import { TransactionsTable } from "@/components/app/transactions-table";
 import { RecurringWatchlist } from "@/components/app/recurring-watchlist";
-import { formatCurrency, formatMonth, currentMonth } from "@/lib/utils";
+import { formatCurrency, formatMonth } from "@/lib/utils";
 import { TrendingUp, Plus } from "lucide-react";
 
 function greeting(): string {
@@ -87,7 +88,7 @@ function DashboardSkeleton() {
 // ── Page ────────────────────────────────────────────────────
 export default function DashboardPage() {
   const { user } = useAuth();
-  const month = currentMonth();
+  const { month } = useSelectedMonth();
 
   const {
     summary,
@@ -184,7 +185,7 @@ export default function DashboardPage() {
               </Link>
             }
           />
-          <div className="grid lg:grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 gap-4 mb-6">
             {tagBreakdowns.length > 0 && (
               <Card>
                 <p className="text-sm font-bold mb-1">Category breakdown</p>
