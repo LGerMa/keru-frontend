@@ -303,11 +303,11 @@ export default function TagsPage() {
 
 function Dialog({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center">
+    <div className="fixed inset-0 z-[100] flex items-end justify-center lg:items-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-background rounded-t-2xl px-5 pt-5 pb-10 shadow-xl">
-        {/* drag handle */}
-        <div className="w-10 h-1 rounded-full bg-muted mx-auto mb-4" />
+      <div className="relative w-full max-w-md bg-background rounded-t-2xl lg:rounded-2xl px-5 pt-5 pb-10 lg:pb-6 shadow-xl">
+        {/* drag handle — mobile only */}
+        <div className="w-10 h-1 rounded-full bg-muted mx-auto mb-4 lg:hidden" />
         <div className="flex items-center justify-between mb-5">
           <p className="text-sm font-semibold">{title}</p>
           <button onClick={onClose} className="text-muted-foreground p-1 -mr-1">
