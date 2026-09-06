@@ -37,14 +37,17 @@ export function TagSelector({ selected, onChange }: TagSelectorProps) {
               key={tag.id}
               type="button"
               onClick={() => toggle(tag.id)}
-              className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-opacity"
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors"
               style={{
-                color: tag.color,
-                backgroundColor: `${tag.color}20`,
-                opacity: active ? 1 : 0.4,
-                outline: active ? `1.5px solid ${tag.color}` : "none",
+                color: active ? tag.color : "var(--muted-foreground)",
+                backgroundColor: active ? `${tag.color}22` : "var(--muted)",
+                outline: active ? `1.5px solid ${tag.color}` : "1px solid var(--border)",
               }}
             >
+              <span
+                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                style={{ backgroundColor: tag.color, opacity: active ? 1 : 0.6 }}
+              />
               {tag.name}
             </button>
           );
