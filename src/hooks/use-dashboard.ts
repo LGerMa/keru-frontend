@@ -35,11 +35,19 @@ export function useDashboard(month?: string): DashboardData {
       setIsLoading(true);
       setError(null);
       try {
+        const [y, mo] = m.split("-");
+        const lastDay = new Date(Number(y), Number(mo), 0).getDate();
+
         const [s, tags, t, expenses] = await Promise.all([
           api.get<DashboardSummary>("/v1/dashboard/summary", { month: m }),
           api.get<TagBreakdown[]>("/v1/dashboard/by-tags", { month: m }),
           api.get<MonthTrend[]>("/v1/dashboard/trends", { months: 6 }),
-          api.get<PaginatedResponse<Expense>>("/v1/expenses", { page: 1, take: 5 }),
+          api.get<PaginatedResponse<Expense>>("/v1/expenses", {
+            page: 1,
+            take: 5,
+            startDate: `${m}-01`,
+            endDate: `${m}-${String(lastDay).padStart(2, "0")}`,
+          }),
         ]);
         if (cancelled) return;
         setSummary(s);

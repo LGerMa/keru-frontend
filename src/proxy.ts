@@ -15,8 +15,12 @@ export function proxy(request: NextRequest) {
   const hostname = request.headers.get("host") ?? "";
   const path = request.nextUrl.pathname;
 
-  // Only apply subdomain routing in production (skip localhost)
-  const isLocal = hostname.startsWith("localhost") || hostname.startsWith("127.");
+  // Only apply subdomain routing in production (skip localhost and ngrok tunnels)
+  const isLocal =
+    hostname.startsWith("localhost") ||
+    hostname.startsWith("127.") ||
+    hostname.endsWith(".ngrok-free.app") ||
+    hostname.endsWith(".ngrok.io");
   if (isLocal) return NextResponse.next();
 
   // On keru.me, redirect app routes to app.keru.me
