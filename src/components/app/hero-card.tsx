@@ -12,12 +12,13 @@ interface HeroCardProps {
 // Inline sparkline — draws the last N months of expenses as a small area chart
 function Sparkline({ trends }: { trends: MonthTrend[] }) {
   if (trends.length < 2) return null;
-  const W = 220, H = 60;
+  // Chart area is W×H; PAD_X leaves room for the end labels, LABEL_H for the month row.
+  const W = 220, H = 60, PAD_X = 14, LABEL_H = 14;
   const pts = trends.map((t) => t.totalExpenses);
   const max = Math.max(...pts);
   const min = Math.min(...pts);
   const range = max - min || 1;
-  const xp = (i: number) => (i / (pts.length - 1)) * (W - 8) + 4;
+  const xp = (i: number) => PAD_X + (i / (pts.length - 1)) * (W - 2 * PAD_X);
   const yp = (v: number) => H - 8 - ((v - min) / range) * (H - 20);
   const linePath = pts
     .map((v, i) => `${i === 0 ? "M" : "L"}${xp(i)},${yp(v)}`)
@@ -29,8 +30,8 @@ function Sparkline({ trends }: { trends: MonthTrend[] }) {
   return (
     <svg
       width={W}
-      height={H}
-      viewBox={`0 0 ${W} ${H}`}
+      height={H + LABEL_H}
+      viewBox={`0 0 ${W} ${H + LABEL_H}`}
       className="block"
       aria-hidden="true"
     >
@@ -56,8 +57,12 @@ function Sparkline({ trends }: { trends: MonthTrend[] }) {
         r="4"
         fill="white"
       />
-      {/* month labels */}
+      {/* month labels — only first, middle, last to avoid crowding; anchors clamped at the edges */}
       {trends.map((t, i) => {
+        const isFirst = i === 0;
+        const isLast = i === trends.length - 1;
+        const isMid = i === Math.floor((trends.length - 1) / 2);
+        if (!isFirst && !isLast && !isMid) return null;
         const label = new Intl.DateTimeFormat("en-US", { month: "short" }).format(
           new Date(t.month + "-01")
         );
@@ -65,8 +70,8 @@ function Sparkline({ trends }: { trends: MonthTrend[] }) {
           <text
             key={t.month}
             x={xp(i)}
-            y={H + 2}
-            textAnchor="middle"
+            y={H + 10}
+            textAnchor={isFirst ? "start" : isLast ? "end" : "middle"}
             fontSize="9"
             fill="rgba(255,255,255,0.75)"
             fontFamily="Inter, ui-sans-serif"
