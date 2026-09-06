@@ -20,7 +20,21 @@ export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOpt
     day: "numeric",
     year: "numeric",
     ...options,
-  }).format(new Date(date))
+  }).format(parseDateOnly(date))
+}
+
+// Date-only strings ("YYYY-MM-DD") are parsed as UTC midnight by `new Date(...)`,
+// which then renders as the previous day in any timezone behind UTC.
+// Parse them as a local calendar date instead so the displayed day always
+// matches the stored date, regardless of the viewer's timezone.
+function parseDateOnly(date: string | Date): Date {
+  if (date instanceof Date) return date
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date)
+  if (match) {
+    const [, year, month, day] = match
+    return new Date(Number(year), Number(month) - 1, Number(day))
+  }
+  return new Date(date)
 }
 
 export function formatMonth(month: string): string {

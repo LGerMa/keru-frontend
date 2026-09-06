@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { useSelectedMonth } from "@/context/month-context";
@@ -15,8 +16,10 @@ import { BudgetOverview } from "@/components/app/budget-overview";
 import { TrendsChart } from "@/components/app/trends-chart";
 import { TransactionsTable } from "@/components/app/transactions-table";
 import { RecurringWatchlist } from "@/components/app/recurring-watchlist";
-import { formatCurrency, formatMonth } from "@/lib/utils";
+import { TagTransactionsModal } from "@/components/app/tag-transactions-modal";
+import { formatCurrency, formatDate, formatMonth } from "@/lib/utils";
 import { TrendingUp, Plus } from "lucide-react";
+import type { TagBreakdownTag } from "@/types/dashboard";
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -89,6 +92,7 @@ function DashboardSkeleton() {
 export default function DashboardPage() {
   const { user } = useAuth();
   const { month } = useSelectedMonth();
+  const [selectedTag, setSelectedTag] = useState<TagBreakdownTag | null>(null);
 
   const {
     summary,
@@ -192,7 +196,7 @@ export default function DashboardPage() {
                 <p className="text-xs text-muted-foreground mb-4">
                   How your spending is distributed
                 </p>
-                <CategoryDonut breakdowns={tagBreakdowns} />
+                <CategoryDonut breakdowns={tagBreakdowns} onSelectTag={setSelectedTag} />
               </Card>
             )}
             {budgetStatuses.length > 0 && (
@@ -285,10 +289,7 @@ export default function DashboardPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{description}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {new Intl.DateTimeFormat("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        }).format(new Date(expense.date))}
+                        {formatDate(expense.date, { month: "short", day: "numeric" })}
                         {primaryTag && <span> · {primaryTag.name}</span>}
                       </p>
                     </div>
@@ -322,6 +323,12 @@ export default function DashboardPage() {
           </Card>
         </>
       )}
+
+      <TagTransactionsModal
+        tag={selectedTag}
+        month={month}
+        onClose={() => setSelectedTag(null)}
+      />
 
     </div>
   );
