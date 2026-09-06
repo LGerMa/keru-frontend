@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { createExpense } from "@/hooks/use-expenses";
 import { TagSelector } from "@/components/app/tag-selector";
 import { PaymentMethodSelect } from "@/components/app/payment-method-select";
+import { PaymentSourceSelect } from "@/components/app/payment-source-select";
 import type { PaymentMethod } from "@/lib/constants";
 
 export default function NewExpensePage() {
@@ -16,6 +17,7 @@ export default function NewExpensePage() {
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
+  const [paymentSourceId, setPaymentSourceId] = useState("");
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,6 +41,7 @@ export default function NewExpensePage() {
         date,
         description: description.trim() || undefined,
         tagIds: tagIds.length > 0 ? tagIds : undefined,
+        paymentSourceId: paymentSourceId || undefined,
       });
       toast.success("Expense added");
       router.push("/expenses");
@@ -103,6 +106,13 @@ export default function NewExpensePage() {
 
         {/* Payment method */}
         <PaymentMethodSelect value={paymentMethod} onChange={setPaymentMethod} />
+
+        {/* Payment source */}
+        <PaymentSourceSelect
+          value={paymentSourceId}
+          onChange={setPaymentSourceId}
+          onPickMethod={setPaymentMethod}
+        />
 
         {/* Tags */}
         <TagSelector selected={tagIds} onChange={setTagIds} />

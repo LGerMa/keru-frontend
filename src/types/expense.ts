@@ -1,4 +1,5 @@
 import type { PaymentMethod } from "@/lib/constants";
+import type { ExpensePaymentSource } from "@/types/payment-source";
 
 export interface ExpenseTag {
   id: string;
@@ -10,6 +11,7 @@ export interface Expense {
   id: string;
   amount: number;
   paymentMethod: PaymentMethod;
+  paymentSource: ExpensePaymentSource | null;
   description: string | null;
   date: string;
   source: "web" | "whatsapp";
@@ -25,6 +27,7 @@ export interface CreateExpenseDto {
   description?: string;
   tagIds?: string[];
   receiptUrl?: string;
+  paymentSourceId?: string | null;
 }
 
 export interface UpdateExpenseDto {
@@ -34,4 +37,6 @@ export interface UpdateExpenseDto {
   description?: string;
   tagIds?: string[];
   receiptUrl?: string;
+  /** Send `null` explicitly to clear an existing attribution. Omit to leave unchanged. */
+  paymentSourceId?: string | null;
 }

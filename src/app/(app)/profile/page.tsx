@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/context/auth-context";
 import { api } from "@/lib/api";
-import { LogOut, Pencil, X, Check } from "lucide-react";
+import { LogOut, Pencil, X, Check, CreditCard, ChevronRight } from "lucide-react";
 
 export default function ProfilePage() {
   const { user, logout, refreshUser } = useAuthContext();
@@ -145,6 +146,20 @@ export default function ProfilePage() {
           <InfoRow label="First name" value={user.profile.name ?? "—"} />
           <InfoRow label="Last name" value={user.profile.lastname ?? "—"} />
           {user.profile.bio && <InfoRow label="Bio" value={user.profile.bio} />}
+        </div>
+      )}
+
+      {/* Settings */}
+      {!editing && (
+        <div className="mt-5 bg-card rounded-2xl shadow-card-md border border-border overflow-hidden">
+          <Link
+            href="/payment-sources"
+            className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/40 transition-colors"
+          >
+            <CreditCard size={16} className="text-muted-foreground shrink-0" />
+            <span className="flex-1 text-sm font-medium">Payment sources</span>
+            <ChevronRight size={16} className="text-muted-foreground shrink-0" />
+          </Link>
         </div>
       )}
 

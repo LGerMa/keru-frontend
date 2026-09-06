@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { getExpense, updateExpense, deleteExpense } from "@/hooks/use-expenses";
 import { TagSelector } from "@/components/app/tag-selector";
 import { PaymentMethodSelect } from "@/components/app/payment-method-select";
+import { PaymentSourceSelect } from "@/components/app/payment-source-select";
 import { TagPill } from "@/components/app/tag-pill";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { Expense, UpdateExpenseDto } from "@/types/expense";
@@ -26,6 +27,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
+  const [paymentSourceId, setPaymentSourceId] = useState("");
   const [tagIds, setTagIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -36,6 +38,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
         setDescription(e.description ?? "");
         setDate(e.date.slice(0, 10));
         setPaymentMethod(e.paymentMethod);
+        setPaymentSourceId(e.paymentSource?.id ?? "");
         setTagIds(e.tags.map((t) => t.id));
       })
       .catch(() => toast.error("Could not load expense"))
@@ -58,6 +61,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
         date,
         description: description.trim() || undefined,
         tagIds,
+        paymentSourceId: paymentSourceId || null,
       };
       const updated = await updateExpense(id, dto);
       setExpense(updated);
@@ -129,10 +133,25 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
             <p className="text-sm">{expense.description}</p>
           )}
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs text-muted-foreground capitalize">
               {expense.paymentMethod.replace("_", " ")}
             </span>
+            {expense.paymentSource && (
+              <span
+                className="inline-flex items-center gap-1.5 text-xs rounded-full px-2 py-0.5 font-medium"
+                style={{
+                  color: expense.paymentSource.color,
+                  backgroundColor: `${expense.paymentSource.color}20`,
+                }}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: expense.paymentSource.color }}
+                />
+                {expense.paymentSource.alias}
+              </span>
+            )}
             {expense.source === "whatsapp" && (
               <span className="text-xs bg-green-100 text-green-700 rounded-full px-2 py-0.5">WhatsApp</span>
             )}
@@ -185,6 +204,11 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           <PaymentMethodSelect value={paymentMethod} onChange={setPaymentMethod} />
+          <PaymentSourceSelect
+            value={paymentSourceId}
+            onChange={setPaymentSourceId}
+            onPickMethod={setPaymentMethod}
+          />
           <TagSelector selected={tagIds} onChange={setTagIds} />
 
           <div className="flex gap-3">
