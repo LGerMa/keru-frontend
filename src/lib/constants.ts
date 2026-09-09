@@ -21,3 +21,13 @@ export const PAYMENT_METHODS = [
 ] as const;
 
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number]["value"];
+
+export const EXPENSE_TYPES = [
+  { value: "fixed",     label: "Fixed",     hint: "Committed and recurring — rent, insurance, phone plan" },
+  { value: "variable",  label: "Variable",  hint: "Recurring necessity, amount fluctuates — groceries, fuel, utilities" },
+  { value: "unplanned", label: "Unplanned", hint: "Emergency you did not budget for — car repair, medical" },
+  { value: "planned",   label: "Planned",   hint: "Deliberate and saved for — trip, gift, big purchase" },
+  { value: "saving",    label: "Saving",    hint: "Money moved to savings, emergency fund, or investment" },
+] as const;
+
+export type ExpenseType = (typeof EXPENSE_TYPES)[number]["value"];

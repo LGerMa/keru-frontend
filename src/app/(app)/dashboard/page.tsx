@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useSelectedMonth } from "@/context/month-context";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { useBudgetStatus } from "@/hooks/use-budgets";
+import { useBudgetRule } from "@/hooks/use-budget-rule";
 import { useRecurring } from "@/hooks/use-recurring";
 import { useInsights } from "@/hooks/use-insights";
 import { useBalanceDelta } from "@/hooks/use-balance-delta";
@@ -14,6 +15,7 @@ import { HeroCard } from "@/components/app/hero-card";
 import { QuickStats } from "@/components/app/quick-stats";
 import { CategoryDonut } from "@/components/app/category-donut";
 import { BudgetOverview } from "@/components/app/budget-overview";
+import { BudgetRuleCard } from "@/components/app/budget-rule-card";
 import { TrendsChart } from "@/components/app/trends-chart";
 import { TransactionsTable } from "@/components/app/transactions-table";
 import { RecurringWatchlist } from "@/components/app/recurring-watchlist";
@@ -109,6 +111,7 @@ export default function DashboardPage() {
   } = useDashboard(month);
 
   const { statuses: budgetStatuses } = useBudgetStatus();
+  const { rule: budgetRule, isLoading: ruleLoading } = useBudgetRule(month);
   const { entries: recurringEntries } = useRecurring();
   const { paymentSources } = usePaymentSources();
 
@@ -182,7 +185,7 @@ export default function DashboardPage() {
       )}
 
       {/* ③ Where it went — category donut + budgets side by side */}
-      {(tagBreakdowns.length > 0 || budgetStatuses.length > 0) && (
+      {(tagBreakdowns.length > 0 || budgetStatuses.length > 0 || (!ruleLoading && budgetRule)) && (
         <>
           <SectionHeader
             label={`Where it went · ${summary ? formatMonth(summary.month) : ""}`}
@@ -212,6 +215,15 @@ export default function DashboardPage() {
                   Progress toward your {summary ? formatMonth(summary.month) : ""} limits
                 </p>
                 <BudgetOverview statuses={budgetStatuses} />
+              </Card>
+            )}
+            {!ruleLoading && budgetRule && (
+              <Card>
+                <p className="text-sm font-bold mb-1">50/30/20 rule</p>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Needs, wants and savings against your income
+                </p>
+                <BudgetRuleCard rule={budgetRule} />
               </Card>
             )}
           </div>

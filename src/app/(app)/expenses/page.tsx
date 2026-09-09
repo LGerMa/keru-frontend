@@ -11,6 +11,7 @@ import { TransactionItem } from "@/components/app/transaction-item";
 import { EmptyState } from "@/components/app/empty-state";
 import { currentMonth, formatMonth } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { EXPENSE_TYPES } from "@/lib/constants";
 
 type Tab = "expenses" | "income";
 
@@ -30,12 +31,13 @@ export default function HistoryPage() {
   const [paymentSourceId, setPaymentSourceId] = useState<string>(
     () => searchParams.get("paymentSourceId") ?? ""
   );
+  const [typeFilter, setTypeFilter] = useState<string>("");
 
   const { paymentSources } = usePaymentSources();
   const activeSource = paymentSources.find((s) => s.id === paymentSourceId);
 
   const { expenses, meta: expMeta, isLoading: expLoading, error: expError } =
-    useExpenses({ month, tags: tagFilter || undefined, paymentSourceId: paymentSourceId || undefined });
+    useExpenses({ month, tags: tagFilter || undefined, paymentSourceId: paymentSourceId || undefined, type: typeFilter || undefined });
   const { income, meta: incMeta, isLoading: incLoading, error: incError } =
     useIncome({ month });
 
@@ -123,6 +125,26 @@ export default function HistoryPage() {
               ))}
             </select>
           )}
+        </div>
+      )}
+
+      {/* Type filter — expenses tab only */}
+      {tab === "expenses" && (
+        <div className="mb-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-2 hidden lg:block">Type</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-muted-foreground lg:hidden">Type:</span>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="w-full lg:w-auto border border-border rounded-full bg-card text-xs font-medium px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              <option value="">All types</option>
+              {EXPENSE_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
       )}
 

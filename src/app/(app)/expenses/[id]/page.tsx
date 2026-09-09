@@ -9,10 +9,12 @@ import { getExpense, updateExpense, deleteExpense } from "@/hooks/use-expenses";
 import { TagSelector } from "@/components/app/tag-selector";
 import { PaymentMethodSelect } from "@/components/app/payment-method-select";
 import { PaymentSourceSelect } from "@/components/app/payment-source-select";
+import { ExpenseTypeSelect } from "@/components/app/expense-type-select";
 import { TagPill } from "@/components/app/tag-pill";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { Expense, UpdateExpenseDto } from "@/types/expense";
-import type { PaymentMethod } from "@/lib/constants";
+import { EXPENSE_TYPES } from "@/lib/constants";
+import type { PaymentMethod, ExpenseType } from "@/lib/constants";
 
 export default function ExpenseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -28,6 +30,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
   const [date, setDate] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
   const [paymentSourceId, setPaymentSourceId] = useState("");
+  const [type, setType] = useState<ExpenseType>("variable");
   const [tagIds, setTagIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -39,6 +42,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
         setDate(e.date.slice(0, 10));
         setPaymentMethod(e.paymentMethod);
         setPaymentSourceId(e.paymentSource?.id ?? "");
+        setType(e.type);
         setTagIds(e.tags.map((t) => t.id));
       })
       .catch(() => toast.error("Could not load expense"))
@@ -62,6 +66,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
         description: description.trim() || undefined,
         tagIds,
         paymentSourceId: paymentSourceId || null,
+        type,
       };
       const updated = await updateExpense(id, dto);
       setExpense(updated);
@@ -137,6 +142,9 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
             <span className="text-xs text-muted-foreground capitalize">
               {expense.paymentMethod.replace("_", " ")}
             </span>
+            <span className="text-xs text-muted-foreground">
+              {EXPENSE_TYPES.find((t) => t.value === expense.type)?.label ?? expense.type}
+            </span>
             {expense.paymentSource && (
               <span
                 className="inline-flex items-center gap-1.5 text-xs rounded-full px-2 py-0.5 font-medium"
@@ -209,6 +217,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
             onChange={setPaymentSourceId}
             onPickMethod={setPaymentMethod}
           />
+          <ExpenseTypeSelect value={type} onChange={setType} />
           <TagSelector selected={tagIds} onChange={setTagIds} />
 
           <div className="flex gap-3">
