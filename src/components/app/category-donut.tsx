@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { formatCurrency } from "@/lib/utils";
 import type { TagBreakdown, TagBreakdownTag } from "@/types/dashboard";
 
@@ -19,6 +19,8 @@ interface TooltipState {
   pct: number;
   x: number;
   y: number;
+  /** Show below the cursor instead of above (near the top edge). */
+  below: boolean;
 }
 
 function toXY(
@@ -39,6 +41,7 @@ export function CategoryDonut({
 }: CategoryDonutProps) {
   const [hovered, setHovered] = useState<number | null>(null);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const items = breakdowns.filter((b) => !b.untagged && b.total > 0);
   const total = items.reduce((s, b) => s + b.total, 0);
@@ -76,20 +79,25 @@ export function CategoryDonut({
     };
   });
 
-  function showTooltip(s: (typeof segments)[number], e: { clientX: number; clientY: number; currentTarget: EventTarget }) {
-    const rect = (e.currentTarget as Element).getBoundingClientRect();
+  function showTooltip(s: (typeof segments)[number], e: { clientX: number; clientY: number }) {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
     setTooltip({
       name: s.name,
       color: s.color,
       total: s.total,
       pct: s.pct,
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: Math.max(60, Math.min(x, rect.width - 60)),
+      y,
+      below: y < 64,
     });
   }
 
   return (
-    <div className="relative flex items-center gap-5">
+    <div>
+    <div ref={containerRef} className="relative flex items-center gap-5">
       {/* Donut SVG */}
       <svg
         width={size}
@@ -178,7 +186,9 @@ export function CategoryDonut({
       {/* Tooltip — value leads, name follows */}
       {tooltip && (
         <div
-          className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-[calc(100%+10px)] rounded-lg border border-border bg-card px-3 py-2 shadow-card-md whitespace-nowrap"
+          className={`pointer-events-none absolute z-10 -translate-x-1/2 rounded-lg border border-border bg-card px-3 py-2 shadow-card-md whitespace-nowrap ${
+            tooltip.below ? "translate-y-4" : "-translate-y-[calc(100%+10px)]"
+          }`}
           style={{ left: tooltip.x, top: tooltip.y }}
         >
           <p className="text-sm font-bold text-foreground leading-tight">
@@ -196,6 +206,12 @@ export function CategoryDonut({
           </p>
         </div>
       )}
+    </div>
+
+      <p className="mt-4 text-xs text-muted-foreground/80 leading-snug">
+        An expense with more than one tag is counted under each of them, so
+        category totals can add up to more than the amount spent.
+      </p>
     </div>
   );
 }

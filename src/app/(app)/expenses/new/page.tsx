@@ -9,7 +9,8 @@ import { createExpense } from "@/hooks/use-expenses";
 import { TagSelector } from "@/components/app/tag-selector";
 import { PaymentMethodSelect } from "@/components/app/payment-method-select";
 import { PaymentSourceSelect } from "@/components/app/payment-source-select";
-import type { PaymentMethod } from "@/lib/constants";
+import { ExpenseTypeSelect } from "@/components/app/expense-type-select";
+import type { PaymentMethod, ExpenseType } from "@/lib/constants";
 
 export default function NewExpensePage() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function NewExpensePage() {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
   const [paymentSourceId, setPaymentSourceId] = useState("");
+  const [type, setType] = useState<ExpenseType>("variable");
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -42,6 +44,7 @@ export default function NewExpensePage() {
         description: description.trim() || undefined,
         tagIds: tagIds.length > 0 ? tagIds : undefined,
         paymentSourceId: paymentSourceId || undefined,
+        type,
       });
       toast.success("Expense added");
       router.push("/expenses");
@@ -113,6 +116,9 @@ export default function NewExpensePage() {
           onChange={setPaymentSourceId}
           onPickMethod={setPaymentMethod}
         />
+
+        {/* Type */}
+        <ExpenseTypeSelect value={type} onChange={setType} />
 
         {/* Tags */}
         <TagSelector selected={tagIds} onChange={setTagIds} />

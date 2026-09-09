@@ -14,6 +14,8 @@ interface UseExpensesOptions {
   tags?: string;
   /** payment source id — filters by attribution */
   paymentSourceId?: string;
+  /** expense type — fixed | variable | unplanned | planned | saving */
+  type?: string;
 }
 
 interface UseExpensesReturn {
@@ -24,7 +26,7 @@ interface UseExpensesReturn {
   refetch: () => void;
 }
 
-export function useExpenses({ page = 1, take = 20, month, tags, paymentSourceId }: UseExpensesOptions = {}): UseExpensesReturn {
+export function useExpenses({ page = 1, take = 20, month, tags, paymentSourceId, type }: UseExpensesOptions = {}): UseExpensesReturn {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [meta, setMeta] = useState<PageMeta | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,6 +49,7 @@ export function useExpenses({ page = 1, take = 20, month, tags, paymentSourceId 
         }
         if (tags) params.tags = tags;
         if (paymentSourceId) params.paymentSourceId = paymentSourceId;
+        if (type) params.type = type;
         const res = await api.get<PaginatedResponse<Expense>>("/v1/expenses", params);
         if (cancelled) return;
         setExpenses(res.items);
@@ -60,7 +63,7 @@ export function useExpenses({ page = 1, take = 20, month, tags, paymentSourceId 
 
     load();
     return () => { cancelled = true; };
-  }, [page, take, month, tags, paymentSourceId, tick]);
+  }, [page, take, month, tags, paymentSourceId, type, tick]);
 
   return {
     expenses,

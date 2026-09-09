@@ -13,6 +13,7 @@ import {
 } from "@/hooks/use-recurring";
 import { TagSelector } from "@/components/app/tag-selector";
 import { PaymentMethodSelect } from "@/components/app/payment-method-select";
+import { PaymentSourceSelect } from "@/components/app/payment-source-select";
 import { IncomeTypeSelect } from "@/components/app/income-type-select";
 import { EmptyState } from "@/components/app/empty-state";
 import { formatCurrency } from "@/lib/utils";
@@ -39,6 +40,7 @@ interface FormState {
   dayOfWeek: string;
   nextDate: string;
   paymentMethod: PaymentMethod | "";
+  paymentSourceId: string;
   incomeType: IncomeType | "";
   tagIds: string[];
 }
@@ -52,6 +54,7 @@ const DEFAULT_FORM: FormState = {
   dayOfWeek: "1",
   nextDate: new Date().toISOString().slice(0, 10),
   paymentMethod: "",
+  paymentSourceId: "",
   incomeType: "",
   tagIds: [],
 };
@@ -92,6 +95,7 @@ export default function RecurringPage() {
       dayOfWeek: entry.dayOfWeek !== null && entry.dayOfWeek !== undefined ? String(entry.dayOfWeek) : "1",
       nextDate: entry.nextDate,
       paymentMethod: (entry.paymentMethod ?? "") as PaymentMethod | "",
+      paymentSourceId: entry.paymentSource?.id ?? "",
       incomeType: (entry.incomeType ?? "") as IncomeType | "",
       tagIds: entry.tags.map((t) => t.id),
     });
@@ -123,6 +127,12 @@ export default function RecurringPage() {
       dto.paymentMethod = form.paymentMethod;
     } else if (form.entryType === "income" && form.incomeType) {
       dto.incomeType = form.incomeType;
+    }
+
+    if (form.entryType === "expense") {
+      // On edit, send null explicitly to clear an existing source.
+      if (form.paymentSourceId) dto.paymentSourceId = form.paymentSourceId;
+      else if (editingEntry) dto.paymentSourceId = null;
     }
 
     if (form.frequency === "monthly" && form.dayOfMonth) {
@@ -319,10 +329,25 @@ function RecurringItem({ entry, isLast, isDeleting, isToggling, onEdit, onDelete
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 mt-0.5">
+        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
           <span className="text-xs text-muted-foreground">{frequencyLabel(entry.frequency)}</span>
           <span className="text-[10px] text-muted-foreground/50">·</span>
           <span className="text-xs text-muted-foreground">Next: {nextDateLabel(entry.nextDate)}</span>
+          {entry.paymentSource && (
+            <span
+              className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+              style={{
+                color: entry.paymentSource.color,
+                backgroundColor: `${entry.paymentSource.color}20`,
+              }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ backgroundColor: entry.paymentSource.color }}
+              />
+              {entry.paymentSource.alias}
+            </span>
+          )}
         </div>
       </div>
 
@@ -366,7 +391,7 @@ function RecurringItem({ entry, isLast, isDeleting, isToggling, onEdit, onDelete
 
 interface FormSheetProps {
   readonly form: FormState;
-  readonly onChange: (f: FormState) => void;
+  readonly onChange: React.Dispatch<React.SetStateAction<FormState>>;
   readonly onSubmit: (e: React.SyntheticEvent) => void;
   readonly onClose: () => void;
   readonly isSubmitting: boolean;
@@ -374,7 +399,9 @@ interface FormSheetProps {
 }
 
 function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit }: FormSheetProps) {
-  const set = (partial: Partial<FormState>) => onChange({ ...form, ...partial });
+  // Functional update — two set() calls in one click (e.g. picking a payment
+  // source that also fills the payment method) must not clobber each other.
+  const set = (partial: Partial<FormState>) => onChange((prev) => ({ ...prev, ...partial }));
 
   return (
     <div className="fixed inset-0 z-100 flex items-end justify-center">
@@ -521,12 +548,19 @@ function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit }: 
             />
           </div>
 
-          {/* Payment method (expense only) */}
+          {/* Payment method + source (expense only) */}
           {form.entryType === "expense" && (
-            <PaymentMethodSelect
-              value={form.paymentMethod}
-              onChange={(v) => set({ paymentMethod: v })}
-            />
+            <>
+              <PaymentMethodSelect
+                value={form.paymentMethod}
+                onChange={(v) => set({ paymentMethod: v })}
+              />
+              <PaymentSourceSelect
+                value={form.paymentSourceId}
+                onChange={(v) => set({ paymentSourceId: v })}
+                onPickMethod={(m) => set({ paymentMethod: m })}
+              />
+            </>
           )}
 
           {/* Income type (income only) */}

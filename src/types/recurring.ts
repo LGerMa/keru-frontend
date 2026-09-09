@@ -7,6 +7,13 @@ export interface RecurringTag {
   color: string;
 }
 
+/** Embedded on each recurring entry (same shape as on expenses). */
+export interface RecurringPaymentSource {
+  id: string;
+  alias: string;
+  color: string;
+}
+
 export interface RecurringEntry {
   id: string;
   entryType: RecurringEntryType;
@@ -20,6 +27,7 @@ export interface RecurringEntry {
   nextDate: string;
   isActive: boolean;
   tags: RecurringTag[];
+  paymentSource: RecurringPaymentSource | null;
   createdAt: string;
 }
 
@@ -34,6 +42,8 @@ export interface CreateRecurringDto {
   dayOfMonth?: number;
   dayOfWeek?: number;
   tagIds?: string[];
+  /** UUID of a payment source; expense entries only. */
+  paymentSourceId?: string | null;
 }
 
 export interface UpdateRecurringDto {
@@ -47,4 +57,6 @@ export interface UpdateRecurringDto {
   dayOfMonth?: number;
   dayOfWeek?: number;
   tagIds?: string[];
+  /** Send `null` explicitly to clear an existing source. Omit to leave unchanged. */
+  paymentSourceId?: string | null;
 }

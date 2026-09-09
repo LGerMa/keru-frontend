@@ -1,4 +1,4 @@
-import type { PaymentMethod } from "@/lib/constants";
+import type { PaymentMethod, ExpenseType } from "@/lib/constants";
 import type { ExpensePaymentSource } from "@/types/payment-source";
 
 export interface ExpenseTag {
@@ -12,6 +12,8 @@ export interface Expense {
   amount: number;
   paymentMethod: PaymentMethod;
   paymentSource: ExpensePaymentSource | null;
+  /** Budgeting classification. Never null — "variable" if it was never set. */
+  type: ExpenseType;
   description: string | null;
   date: string;
   source: "web" | "whatsapp";
@@ -28,6 +30,8 @@ export interface CreateExpenseDto {
   tagIds?: string[];
   receiptUrl?: string;
   paymentSourceId?: string | null;
+  /** Omit to default to "variable". */
+  type?: ExpenseType;
 }
 
 export interface UpdateExpenseDto {
@@ -39,4 +43,5 @@ export interface UpdateExpenseDto {
   receiptUrl?: string;
   /** Send `null` explicitly to clear an existing attribution. Omit to leave unchanged. */
   paymentSourceId?: string | null;
+  type?: ExpenseType;
 }
