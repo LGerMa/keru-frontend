@@ -1,3 +1,6 @@
+import type { Expense } from "./expense";
+import type { PageMeta } from "./api";
+
 export interface DashboardSummary {
   month: string;         // "2026-04"
   totalIncome: number;
@@ -71,4 +74,11 @@ export interface BudgetRule {
   income: number;
   breakdown: BudgetRuleBreakdown;
   rule: BudgetRuleBucket[];        // always [needs, wants, savings] in that order
+}
+
+export interface BudgetRuleTransactions {
+  bucket: RuleBucketName;
+  month: string;        // "YYYY-MM"
+  items: Expense[];
+  meta: PageMeta;
 }
