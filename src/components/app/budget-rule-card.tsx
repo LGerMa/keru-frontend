@@ -1,8 +1,9 @@
 import { formatCurrency } from "@/lib/utils";
-import type { BudgetRule, RuleStatusLevel } from "@/types/dashboard";
+import type { BudgetRule, RuleBucketName, RuleStatusLevel } from "@/types/dashboard";
 
 interface BudgetRuleCardProps {
   rule: BudgetRule;
+  onSelectBucket?: (bucket: RuleBucketName) => void;
 }
 
 const STATUS_COLOR: Record<RuleStatusLevel, string> = {
@@ -17,7 +18,7 @@ const BUCKET_LABEL: Record<string, string> = {
   savings: "Savings",
 };
 
-export function BudgetRuleCard({ rule }: BudgetRuleCardProps) {
+export function BudgetRuleCard({ rule, onSelectBucket }: BudgetRuleCardProps) {
   if (rule.income === 0) {
     return (
       <p className="text-sm text-muted-foreground py-4 text-center">
@@ -32,8 +33,15 @@ export function BudgetRuleCard({ rule }: BudgetRuleCardProps) {
         const fill = Math.max(0, Math.min(b.percentage, 100));
         const color = STATUS_COLOR[b.status];
 
+        const Wrapper = onSelectBucket ? "button" : "div";
+
         return (
-          <div key={b.bucket}>
+          <Wrapper
+            key={b.bucket}
+            type={onSelectBucket ? "button" : undefined}
+            onClick={onSelectBucket ? () => onSelectBucket(b.bucket) : undefined}
+            className={onSelectBucket ? "text-left -mx-1 px-1 py-0.5 rounded-lg hover:bg-muted/50 transition-colors" : undefined}
+          >
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-medium text-foreground">
                 {BUCKET_LABEL[b.bucket] ?? b.bucket}
@@ -52,7 +60,7 @@ export function BudgetRuleCard({ rule }: BudgetRuleCardProps) {
                 style={{ width: `${fill}%`, backgroundColor: color }}
               />
             </div>
-          </div>
+          </Wrapper>
         );
       })}
     </div>

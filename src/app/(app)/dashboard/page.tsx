@@ -16,6 +16,7 @@ import { QuickStats } from "@/components/app/quick-stats";
 import { CategoryDonut } from "@/components/app/category-donut";
 import { BudgetOverview } from "@/components/app/budget-overview";
 import { BudgetRuleCard } from "@/components/app/budget-rule-card";
+import { BudgetRuleTransactionsModal } from "@/components/app/budget-rule-transactions-modal";
 import { TrendsChart } from "@/components/app/trends-chart";
 import { TransactionsTable } from "@/components/app/transactions-table";
 import { RecurringWatchlist } from "@/components/app/recurring-watchlist";
@@ -24,7 +25,7 @@ import { PaymentSourcesCard } from "@/components/app/payment-sources-card";
 import { PaymentSourceTransactionsModal } from "@/components/app/payment-source-transactions-modal";
 import { formatCurrency, formatDate, formatMonth } from "@/lib/utils";
 import { TrendingUp, Plus } from "lucide-react";
-import type { TagBreakdownTag } from "@/types/dashboard";
+import type { TagBreakdownTag, BudgetRuleBucket } from "@/types/dashboard";
 import type { PaymentSource } from "@/types/payment-source";
 
 function greeting(): string {
@@ -100,6 +101,7 @@ export default function DashboardPage() {
   const { month } = useSelectedMonth();
   const [selectedTag, setSelectedTag] = useState<TagBreakdownTag | null>(null);
   const [selectedSource, setSelectedSource] = useState<PaymentSource | null>(null);
+  const [selectedBucket, setSelectedBucket] = useState<BudgetRuleBucket | null>(null);
 
   const {
     summary,
@@ -223,7 +225,10 @@ export default function DashboardPage() {
                 <p className="text-xs text-muted-foreground mb-4">
                   Needs, wants and savings against your income
                 </p>
-                <BudgetRuleCard rule={budgetRule} />
+                <BudgetRuleCard rule={budgetRule} onSelectBucket={(bucketName) => {
+                  const b = budgetRule.rule.find((r) => r.bucket === bucketName) ?? null;
+                  setSelectedBucket(b);
+                }} />
               </Card>
             )}
           </div>
@@ -378,6 +383,12 @@ export default function DashboardPage() {
         source={selectedSource}
         month={month}
         onClose={() => setSelectedSource(null)}
+      />
+
+      <BudgetRuleTransactionsModal
+        bucket={selectedBucket}
+        month={month}
+        onClose={() => setSelectedBucket(null)}
       />
 
     </div>

@@ -9,9 +9,11 @@ type Transaction =
 
 interface TransactionItemProps {
   transaction: Transaction;
+  /** Render as a deduction (e.g. an "unplanned" expense eating into the savings bucket) — dims the row and tints the amount red. */
+  deduction?: boolean;
 }
 
-export function TransactionItem({ transaction }: TransactionItemProps) {
+export function TransactionItem({ transaction, deduction = false }: TransactionItemProps) {
   const isExpense = transaction.kind === "expense";
   const href = isExpense
     ? `/expenses/${transaction.id}`
@@ -47,7 +49,7 @@ export function TransactionItem({ transaction }: TransactionItemProps) {
         </p>
       </div>
 
-      <p className={`text-sm font-bold flex-shrink-0 ${isExpense ? "text-foreground" : "text-[#22C55E]"}`}>
+      <p className={`text-sm font-bold flex-shrink-0 ${deduction ? "text-destructive" : isExpense ? "text-foreground" : "text-[#22C55E]"}`}>
         {isExpense ? "-" : "+"}
         {formatCurrency(transaction.amount)}
       </p>
