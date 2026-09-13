@@ -7,11 +7,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { MonthProvider, useSelectedMonth } from "@/context/month-context";
 import {
   Home, List, Plus, Tag, User,
-  TrendingUp, Repeat2, Search,
+  TrendingUp, Repeat2,
   Bell, Sun, Moon, ChevronDown, Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { cn, formatMonth } from "@/lib/utils";
+import { TopbarSearch } from "@/components/app/topbar-search";
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: Home,    labelKey: "dashboard" as const },
@@ -234,17 +235,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
         <header className="hidden lg:flex items-center gap-3 h-[60px] px-8 border-b bg-background sticky top-0 z-40 flex-shrink-0">
 
           {/* Search */}
-          <div className="relative flex-1 max-w-[380px]">
-            <Search
-              size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            />
-            <input
-              type="search"
-              placeholder={tNav("searchPlaceholder")}
-              className="w-full pl-9 pr-3 py-2 rounded-[10px] border border-border bg-card text-foreground text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-shadow"
-            />
-          </div>
+          <TopbarSearch />
 
           <div className="flex-1" />
 

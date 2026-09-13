@@ -78,7 +78,13 @@
     "expense": "Gasto",
     "searchPlaceholder": "Buscar transacciones, etiquetas…",
     "switchToLight": "Cambiar a modo claro",
-    "switchToDark": "Cambiar a modo oscuro"
+    "switchToDark": "Cambiar a modo oscuro",
+    "searchExpenses": "Gastos",
+    "searchIncome": "Ingresos",
+    "searchTags": "Etiquetas",
+    "searchNoResults": "Sin resultados para \"{query}\"",
+    "searchLoading": "Buscando…",
+    "searchHint": "Escribe para buscar tus transacciones y etiquetas"
   },
   "Dashboard": {
     "greetingMorning": "Buenos días",

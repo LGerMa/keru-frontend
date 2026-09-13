@@ -78,7 +78,13 @@
     "expense": "Expense",
     "searchPlaceholder": "Search transactions, tags…",
     "switchToLight": "Switch to light mode",
-    "switchToDark": "Switch to dark mode"
+    "switchToDark": "Switch to dark mode",
+    "searchExpenses": "Expenses",
+    "searchIncome": "Income",
+    "searchTags": "Tags",
+    "searchNoResults": "No results for \"{query}\"",
+    "searchLoading": "Searching…",
+    "searchHint": "Type to search your transactions and tags"
   },
   "Dashboard": {
     "greetingMorning": "Good morning",
