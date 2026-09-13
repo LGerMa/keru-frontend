@@ -19,6 +19,9 @@ export function BudgetOverview({ statuses }: BudgetOverviewProps) {
   const t = useTranslations("Dashboard");
   if (statuses.length === 0) return null;
 
+  const totalSpent = statuses.reduce((sum, s) => sum + s.spent, 0);
+  const totalBudget = statuses.reduce((sum, s) => sum + s.budget, 0);
+
   return (
     <div className="mb-5">
       <div className="flex items-center justify-between mb-3">
@@ -60,6 +63,14 @@ export function BudgetOverview({ statuses }: BudgetOverviewProps) {
             </div>
           );
         })}
+        <div className="flex items-center justify-between pt-1 mt-1 border-t border-border">
+          <span className="text-xs font-semibold text-foreground">{t("budgetsTotal")}</span>
+          <span className="text-xs font-semibold text-foreground">
+            {formatCurrency(totalSpent)}
+            <span className="text-muted-foreground/50"> / </span>
+            {formatCurrency(totalBudget)}
+          </span>
+        </div>
       </div>
     </div>
   );

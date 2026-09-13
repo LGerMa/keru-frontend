@@ -128,6 +128,7 @@
     "donutCenterLabel": "GASTADO",
     "multiTagNote": "Un gasto con más de una etiqueta se cuenta en cada una de ellas, por lo que los totales por categoría pueden sumar más que el monto gastado.",
     "budgetsManage": "Gestionar",
+    "budgetsTotal": "Total",
     "bucketNeeds": "Necesidades",
     "bucketWants": "Deseos",
     "bucketSavings": "Ahorro",

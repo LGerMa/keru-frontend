@@ -128,6 +128,7 @@
     "donutCenterLabel": "SPENT",
     "multiTagNote": "An expense with more than one tag is counted under each of them, so category totals can add up to more than the amount spent.",
     "budgetsManage": "Manage",
+    "budgetsTotal": "Total",
     "bucketNeeds": "Needs",
     "bucketWants": "Wants",
     "bucketSavings": "Savings",
