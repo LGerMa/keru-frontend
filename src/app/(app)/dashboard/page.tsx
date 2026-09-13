@@ -115,7 +115,7 @@ export default function DashboardPage() {
     error,
   } = useDashboard(month);
 
-  const { statuses: budgetStatuses } = useBudgetStatus();
+  const { statuses: budgetStatuses } = useBudgetStatus(month);
   const { rule: budgetRule, isLoading: ruleLoading } = useBudgetRule(month);
   const { entries: recurringEntries } = useRecurring();
   const { paymentSources } = usePaymentSources();
