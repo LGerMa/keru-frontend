@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { formatCurrency } from "@/lib/utils";
 import type { DashboardSummary, TagBreakdown } from "@/types/dashboard";
 
@@ -38,6 +41,7 @@ export function QuickStats({
   expenseCount,
   daysIntoMonth,
 }: QuickStatsProps) {
+  const t = useTranslations("Dashboard");
   // Daily average (expenses only, based on days into the current month)
   const dailyAvg =
     daysIntoMonth > 0 ? summary.totalExpenses / daysIntoMonth : 0;
@@ -52,26 +56,30 @@ export function QuickStats({
   return (
     <div className="grid grid-cols-4 gap-3 mb-6">
       <StatCard
-        label="Daily avg"
+        label={t("dailyAvg")}
         value={formatCurrency(dailyAvg)}
-        sub={`${daysIntoMonth} day${daysIntoMonth !== 1 ? "s" : ""} in`}
+        sub={
+          daysIntoMonth === 1
+            ? t("dailyAvgSubOne", { count: daysIntoMonth })
+            : t("dailyAvgSubOther", { count: daysIntoMonth })
+        }
       />
       <StatCard
-        label="Expenses"
+        label={t("expensesLabel")}
         value={String(expenseCount)}
-        sub="transactions this month"
+        sub={t("expensesSub")}
         valueColor="var(--primary)"
       />
       <StatCard
-        label="Top category"
-        value={topTag?.tag.name ?? "—"}
-        sub={topTag ? formatCurrency(topTag.total) + " spent" : "no data"}
+        label={t("topCategory")}
+        value={topTag?.tag.name ?? t("topCategoryNone")}
+        sub={topTag ? `${formatCurrency(topTag.total)} ${t("topCategorySpent")}` : t("topCategoryNoData")}
         valueColor={topTag?.tag.color ?? "var(--foreground)"}
       />
       <StatCard
-        label="All transactions"
+        label={t("allTransactionsLabel")}
         value={String(totalTx)}
-        sub={`${summary.incomeCount} income · ${summary.expenseCount} expenses`}
+        sub={t("allTransactionsSub", { income: summary.incomeCount, expenses: summary.expenseCount })}
       />
     </div>
   );

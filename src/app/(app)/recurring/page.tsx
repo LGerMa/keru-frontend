@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Pencil, Trash2, Pause, Play, X } from "lucide-react";
 import { toast } from "sonner";
+import { useLocale, useTranslations } from "next-intl";
 import {
   useRecurring,
   createRecurring,
@@ -21,15 +22,11 @@ import type { RecurringEntry, RecurringFrequency, RecurringEntryType, CreateRecu
 import type { PaymentMethod } from "@/lib/constants";
 import type { IncomeType } from "@/types/income";
 
-const FREQUENCIES: { value: RecurringFrequency; label: string }[] = [
-  { value: "weekly",   label: "Weekly" },
-  { value: "biweekly", label: "Biweekly" },
-  { value: "monthly",  label: "Monthly" },
-];
+const FREQUENCY_VALUES: RecurringFrequency[] = ["weekly", "biweekly", "monthly"];
 
-const DAYS_OF_WEEK = [
-  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-];
+const DAY_OF_WEEK_KEYS = [
+  "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday",
+] as const;
 
 interface FormState {
   entryType: RecurringEntryType;
@@ -59,17 +56,24 @@ const DEFAULT_FORM: FormState = {
   tagIds: [],
 };
 
-function frequencyLabel(f: RecurringFrequency): string {
-  return FREQUENCIES.find((x) => x.value === f)?.label ?? f;
-}
-
-function nextDateLabel(date: string): string {
+function nextDateLabel(date: string, locale: string): string {
   const d = new Date(date + "T00:00:00");
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return d.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" });
 }
 
 export default function RecurringPage() {
+  const t = useTranslations("Recurring");
+  const locale = useLocale();
   const { entries, isLoading, error, refetch } = useRecurring();
+
+  const FREQUENCIES: { value: RecurringFrequency; label: string }[] = FREQUENCY_VALUES.map((v) => ({
+    value: v,
+    label: t(`frequency.${v}`),
+  }));
+
+  function frequencyLabel(f: RecurringFrequency): string {
+    return FREQUENCIES.find((x) => x.value === f)?.label ?? f;
+  }
 
   const [showForm, setShowForm] = useState(false);
   const [editingEntry, setEditingEntry] = useState<RecurringEntry | null>(null);
@@ -106,11 +110,11 @@ export default function RecurringPage() {
     e.preventDefault();
     const parsed = Number.parseFloat(form.amount);
     if (Number.isNaN(parsed) || parsed <= 0) {
-      toast.error("Enter a valid amount");
+      toast.error(t("invalidAmount"));
       return;
     }
     if (!form.nextDate) {
-      toast.error("Next date is required");
+      toast.error(t("nextDateRequired"));
       return;
     }
 
@@ -148,15 +152,15 @@ export default function RecurringPage() {
     try {
       if (editingEntry) {
         await updateRecurring(editingEntry.id, dto);
-        toast.success("Updated");
+        toast.success(t("updated"));
       } else {
         await createRecurring(dto);
-        toast.success("Recurring entry created");
+        toast.success(t("created"));
       }
       refetch();
       setShowForm(false);
     } catch (err) {
-      toast.error((err as Error).message ?? "Something went wrong");
+      toast.error((err as Error).message ?? t("somethingWentWrong"));
     } finally {
       setIsSubmitting(false);
     }
@@ -166,10 +170,10 @@ export default function RecurringPage() {
     setDeletingId(id);
     try {
       await deleteRecurring(id);
-      toast.success("Deleted");
+      toast.success(t("deleted"));
       refetch();
     } catch (err) {
-      toast.error((err as Error).message ?? "Could not delete");
+      toast.error((err as Error).message ?? t("deleteFailed"));
     } finally {
       setDeletingId(null);
     }
@@ -180,14 +184,14 @@ export default function RecurringPage() {
     try {
       if (entry.isActive) {
         await pauseRecurring(entry.id);
-        toast.success("Paused");
+        toast.success(t("paused"));
       } else {
         await resumeRecurring(entry.id);
-        toast.success("Resumed");
+        toast.success(t("resumed"));
       }
       refetch();
     } catch (err) {
-      toast.error((err as Error).message ?? "Could not update");
+      toast.error((err as Error).message ?? t("updateFailed"));
     } finally {
       setTogglingId(null);
     }
@@ -199,13 +203,13 @@ export default function RecurringPage() {
   return (
     <div className="pt-6">
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-lg font-bold tracking-tight">Recurring</h1>
+        <h1 className="text-lg font-bold tracking-tight">{t("title")}</h1>
         <button
           onClick={openCreate}
           className="flex items-center gap-1 text-xs text-primary font-semibold"
         >
           <Plus size={14} />
-          New
+          {t("new")}
         </button>
       </div>
 
@@ -219,14 +223,14 @@ export default function RecurringPage() {
 
       {!isLoading && !error && entries.length === 0 && (
         <EmptyState
-          title="No recurring entries"
-          description="Set up recurring expenses or income that repeat automatically"
+          title={t("emptyTitle")}
+          description={t("emptyDescription")}
           action={
             <button
               onClick={openCreate}
               className="text-xs text-primary underline underline-offset-4"
             >
-              Create your first recurring entry
+              {t("emptyAction")}
             </button>
           }
         />
@@ -237,7 +241,7 @@ export default function RecurringPage() {
           {expenses.length > 0 && (
             <section>
               <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-2">
-                Expenses
+                {t("expenses")}
               </p>
               <div className="bg-card rounded-2xl shadow-card-md border border-border overflow-hidden">
                 {expenses.map((entry, i) => (
@@ -250,6 +254,9 @@ export default function RecurringPage() {
                     onEdit={() => openEdit(entry)}
                     onDelete={() => handleDelete(entry.id)}
                     onToggle={() => handleToggle(entry)}
+                    frequencyLabel={frequencyLabel}
+                    locale={locale}
+                    t={t}
                   />
                 ))}
               </div>
@@ -259,7 +266,7 @@ export default function RecurringPage() {
           {incomes.length > 0 && (
             <section>
               <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-2">
-                Income
+                {t("income")}
               </p>
               <div className="bg-card rounded-2xl shadow-card-md border border-border overflow-hidden">
                 {incomes.map((entry, i) => (
@@ -272,6 +279,9 @@ export default function RecurringPage() {
                     onEdit={() => openEdit(entry)}
                     onDelete={() => handleDelete(entry.id)}
                     onToggle={() => handleToggle(entry)}
+                    frequencyLabel={frequencyLabel}
+                    locale={locale}
+                    t={t}
                   />
                 ))}
               </div>
@@ -288,6 +298,7 @@ export default function RecurringPage() {
           onClose={() => setShowForm(false)}
           isSubmitting={isSubmitting}
           isEdit={!!editingEntry}
+          frequencies={FREQUENCIES}
         />
       )}
     </div>
@@ -304,9 +315,12 @@ interface RecurringItemProps {
   readonly onEdit: () => void;
   readonly onDelete: () => void;
   readonly onToggle: () => void;
+  readonly frequencyLabel: (f: RecurringFrequency) => string;
+  readonly locale: string;
+  readonly t: ReturnType<typeof useTranslations>;
 }
 
-function RecurringItem({ entry, isLast, isDeleting, isToggling, onEdit, onDelete, onToggle }: RecurringItemProps) {
+function RecurringItem({ entry, isLast, isDeleting, isToggling, onEdit, onDelete, onToggle, frequencyLabel, locale, t }: RecurringItemProps) {
   const tagColor = entry.tags[0]?.color;
   const isIncome = entry.entryType === "income";
 
@@ -321,18 +335,21 @@ function RecurringItem({ entry, isLast, isDeleting, isToggling, onEdit, onDelete
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className={`text-sm font-semibold ${entry.isActive ? "text-foreground" : "text-muted-foreground line-through"}`}>
-            {entry.description || `${frequencyLabel(entry.frequency)} ${entry.entryType}`}
+            {entry.description ||
+              (entry.entryType === "income"
+                ? t("fallbackIncome", { frequency: frequencyLabel(entry.frequency).toLowerCase() })
+                : t("fallbackExpense", { frequency: frequencyLabel(entry.frequency).toLowerCase() }))}
           </span>
           {!entry.isActive && (
             <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">
-              Paused
+              {t("paused")}
             </span>
           )}
         </div>
         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
           <span className="text-xs text-muted-foreground">{frequencyLabel(entry.frequency)}</span>
           <span className="text-[10px] text-muted-foreground/50">·</span>
-          <span className="text-xs text-muted-foreground">Next: {nextDateLabel(entry.nextDate)}</span>
+          <span className="text-xs text-muted-foreground">{t("next", { date: nextDateLabel(entry.nextDate, locale) })}</span>
           {entry.paymentSource && (
             <span
               className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full"
@@ -363,14 +380,14 @@ function RecurringItem({ entry, isLast, isDeleting, isToggling, onEdit, onDelete
           onClick={onToggle}
           disabled={isToggling}
           className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
-          aria-label={entry.isActive ? "Pause" : "Resume"}
+          aria-label={entry.isActive ? t("pause") : t("resume")}
         >
           {entry.isActive ? <Pause size={14} /> : <Play size={14} />}
         </button>
         <button
           onClick={onEdit}
           className="text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Edit"
+          aria-label={t("edit")}
         >
           <Pencil size={14} />
         </button>
@@ -378,7 +395,7 @@ function RecurringItem({ entry, isLast, isDeleting, isToggling, onEdit, onDelete
           onClick={onDelete}
           disabled={isDeleting}
           className="text-destructive disabled:opacity-40"
-          aria-label="Delete"
+          aria-label={t("delete")}
         >
           <Trash2 size={14} />
         </button>
@@ -396,21 +413,23 @@ interface FormSheetProps {
   readonly onClose: () => void;
   readonly isSubmitting: boolean;
   readonly isEdit: boolean;
+  readonly frequencies: { value: RecurringFrequency; label: string }[];
 }
 
-function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit }: FormSheetProps) {
+function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit, frequencies }: FormSheetProps) {
+  const t = useTranslations("Recurring");
   // Functional update — two set() calls in one click (e.g. picking a payment
   // source that also fills the payment method) must not clobber each other.
   const set = (partial: Partial<FormState>) => onChange((prev) => ({ ...prev, ...partial }));
 
   return (
     <div className="fixed inset-0 z-100 flex items-end justify-center">
-      <button type="button" className="absolute inset-0 bg-black/50 cursor-default" aria-label="Close" onClick={onClose} />
+      <button type="button" className="absolute inset-0 bg-black/50 cursor-default" aria-label={t("close")} onClick={onClose} />
       <div className="relative w-full max-w-md bg-background rounded-t-2xl px-5 pt-5 pb-10 shadow-xl max-h-[90vh] overflow-y-auto">
         {/* Drag handle */}
         <div className="w-10 h-1 rounded-full bg-muted mx-auto mb-4" />
         <div className="flex items-center justify-between mb-5">
-          <p className="text-sm font-semibold">{isEdit ? "Edit recurring" : "New recurring"}</p>
+          <p className="text-sm font-semibold">{isEdit ? t("editRecurring") : t("newRecurring")}</p>
           <button onClick={onClose} className="text-muted-foreground p-1 -mr-1">
             <X size={18} />
           </button>
@@ -419,23 +438,23 @@ function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit }: 
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           {/* Entry type */}
           <div>
-            <p className="text-xs text-muted-foreground mb-2">Type</p>
+            <p className="text-xs text-muted-foreground mb-2">{t("type")}</p>
             <div className="flex gap-1 bg-muted rounded-xl p-1">
-              {(["expense", "income"] as RecurringEntryType[]).map((t) => (
+              {(["expense", "income"] as RecurringEntryType[]).map((entryType) => (
                 <button
-                  key={t}
+                  key={entryType}
                   type="button"
-                  onClick={() => set({ entryType: t })}
-                  className="flex-1 py-2 rounded-lg text-xs font-semibold transition-colors capitalize"
+                  onClick={() => set({ entryType })}
+                  className="flex-1 py-2 rounded-lg text-xs font-semibold transition-colors"
                   style={
-                    form.entryType !== t
+                    form.entryType !== entryType
                       ? {}
-                      : t === "income"
+                      : entryType === "income"
                         ? { backgroundColor: "#22C55E", color: "#fff" }
                         : { backgroundColor: "oklch(0.585 0.233 277)", color: "#fff" }
                   }
                 >
-                  {t}
+                  {entryType === "expense" ? t("expenseType") : t("incomeType")}
                 </button>
               ))}
             </div>
@@ -443,7 +462,7 @@ function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit }: 
 
           {/* Amount */}
           <div>
-            <label htmlFor="rec-amount" className="text-xs text-muted-foreground mb-1 block">Amount</label>
+            <label htmlFor="rec-amount" className="text-xs text-muted-foreground mb-1 block">{t("amount")}</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
               <input
@@ -463,11 +482,11 @@ function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit }: 
 
           {/* Description */}
           <div>
-            <label htmlFor="rec-description" className="text-xs text-muted-foreground mb-1 block">Description (optional)</label>
+            <label htmlFor="rec-description" className="text-xs text-muted-foreground mb-1 block">{t("descriptionOptional")}</label>
             <input
               id="rec-description"
               type="text"
-              placeholder={form.entryType === "expense" ? "e.g. Netflix" : "e.g. Monthly salary"}
+              placeholder={form.entryType === "expense" ? t("descriptionPlaceholderExpense") : t("descriptionPlaceholderIncome")}
               value={form.description}
               onChange={(e) => set({ description: e.target.value })}
               className="w-full border rounded-xl px-4 py-3 text-sm bg-transparent focus:outline-none focus:ring-2 focus:ring-primary"
@@ -476,9 +495,9 @@ function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit }: 
 
           {/* Frequency */}
           <div>
-            <p className="text-xs text-muted-foreground mb-2">Frequency</p>
+            <p className="text-xs text-muted-foreground mb-2">{t("frequencyLabel")}</p>
             <div className="flex gap-2 flex-wrap">
-              {FREQUENCIES.map((f) => (
+              {frequencies.map((f) => (
                 <button
                   key={f.value}
                   type="button"
@@ -499,7 +518,7 @@ function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit }: 
           {/* Day of month — only for monthly */}
           {form.frequency === "monthly" && (
             <div>
-              <label htmlFor="rec-day-month" className="text-xs text-muted-foreground mb-1 block">Day of month (1–28)</label>
+              <label htmlFor="rec-day-month" className="text-xs text-muted-foreground mb-1 block">{t("dayOfMonth")}</label>
               <input
                 id="rec-day-month"
                 type="number"
@@ -515,11 +534,11 @@ function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit }: 
           {/* Day of week — for weekly / biweekly */}
           {(form.frequency === "weekly" || form.frequency === "biweekly") && (
             <div>
-              <p className="text-xs text-muted-foreground mb-2">Day of week</p>
+              <p className="text-xs text-muted-foreground mb-2">{t("dayOfWeek")}</p>
               <div className="flex gap-1.5 flex-wrap">
-                {DAYS_OF_WEEK.map((day, idx) => (
+                {DAY_OF_WEEK_KEYS.map((dayKey, idx) => (
                   <button
-                    key={day}
+                    key={dayKey}
                     type="button"
                     onClick={() => set({ dayOfWeek: String(idx) })}
                     className="px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors"
@@ -529,7 +548,7 @@ function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit }: 
                         : {}
                     }
                   >
-                    {day.slice(0, 3)}
+                    {t(`daysShort.${dayKey}`)}
                   </button>
                 ))}
               </div>
@@ -538,7 +557,7 @@ function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit }: 
 
           {/* Next date */}
           <div>
-            <label htmlFor="rec-next-date" className="text-xs text-muted-foreground mb-1 block">Next date</label>
+            <label htmlFor="rec-next-date" className="text-xs text-muted-foreground mb-1 block">{t("nextDateLabel")}</label>
             <input
               id="rec-next-date"
               type="date"
@@ -581,7 +600,7 @@ function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit }: 
               onClick={onClose}
               className="flex-1 border rounded-xl py-3 text-sm font-medium"
             >
-              Cancel
+              {t("cancel")}
             </button>
             <button
               type="submit"
@@ -589,7 +608,7 @@ function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit }: 
               className="flex-1 bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium disabled:opacity-50"
             >
               {/* eslint-disable-next-line no-nested-ternary */}
-              {isSubmitting ? "Saving…" : isEdit ? "Save" : "Create"}
+              {isSubmitting ? t("saving") : isEdit ? t("save") : t("create")}
             </button>
           </div>
         </form>

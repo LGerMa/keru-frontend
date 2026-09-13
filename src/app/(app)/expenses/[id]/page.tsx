@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useLocale, useTranslations } from "next-intl";
 import { getExpense, updateExpense, deleteExpense } from "@/hooks/use-expenses";
 import { TagSelector } from "@/components/app/tag-selector";
 import { PaymentMethodSelect } from "@/components/app/payment-method-select";
@@ -18,6 +19,9 @@ import type { PaymentMethod, ExpenseType } from "@/lib/constants";
 
 export default function ExpenseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const t = useTranslations("Expenses");
+  const tCommon = useTranslations("Common");
+  const locale = useLocale();
   const router = useRouter();
   const [expense, setExpense] = useState<Expense | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,16 +49,16 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
         setType(e.type);
         setTagIds(e.tags.map((t) => t.id));
       })
-      .catch(() => toast.error("Could not load expense"))
+      .catch(() => toast.error(t("loadFailed")))
       .finally(() => setIsLoading(false));
-  }, [id]);
+  }, [id, t]);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!expense) return;
     const parsed = parseFloat(amount);
     if (isNaN(parsed) || parsed <= 0) {
-      toast.error("Enter a valid amount");
+      toast.error(t("invalidAmount"));
       return;
     }
     setIsSubmitting(true);
@@ -71,22 +75,22 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
       const updated = await updateExpense(id, dto);
       setExpense(updated);
       setIsEditing(false);
-      toast.success("Expense updated");
+      toast.success(t("expenseUpdated"));
     } catch (err) {
-      toast.error((err as Error).message ?? "Something went wrong");
+      toast.error((err as Error).message ?? t("somethingWentWrong"));
     } finally {
       setIsSubmitting(false);
     }
   }
 
   async function handleDelete() {
-    if (!confirm("Delete this expense?")) return;
+    if (!confirm(t("confirmDelete"))) return;
     try {
       await deleteExpense(id);
-      toast.success("Expense deleted");
+      toast.success(t("expenseDeleted"));
       router.push("/expenses");
     } catch (err) {
-      toast.error((err as Error).message ?? "Could not delete");
+      toast.error((err as Error).message ?? t("deleteFailed"));
     }
   }
 
@@ -101,7 +105,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
   if (!expense) {
     return (
       <div className="pt-6">
-        <p className="text-sm text-destructive">Expense not found.</p>
+        <p className="text-sm text-destructive">{t("notFound")}</p>
       </div>
     );
   }
@@ -113,7 +117,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
           <Link href="/expenses" className="text-muted-foreground">
             <ChevronLeft size={20} />
           </Link>
-          <h1 className="text-base font-semibold">Expense</h1>
+          <h1 className="text-base font-semibold">{t("title")}</h1>
         </div>
         <div className="flex items-center gap-3">
           {!isEditing && (
@@ -131,7 +135,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
         <div className="flex flex-col gap-4">
           <div>
             <p className="text-3xl font-medium">{formatCurrency(expense.amount)}</p>
-            <p className="text-xs text-muted-foreground mt-1">{formatDate(expense.date)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{formatDate(expense.date, undefined, locale)}</p>
           </div>
 
           {expense.description && (
@@ -139,11 +143,11 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
           )}
 
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-muted-foreground capitalize">
-              {expense.paymentMethod.replace("_", " ")}
+            <span className="text-xs text-muted-foreground">
+              {tCommon(`paymentMethods.${expense.paymentMethod}`)}
             </span>
             <span className="text-xs text-muted-foreground">
-              {EXPENSE_TYPES.find((t) => t.value === expense.type)?.label ?? expense.type}
+              {EXPENSE_TYPES.find((et) => et.value === expense.type) ? tCommon(`expenseTypes.${expense.type}`) : expense.type}
             </span>
             {expense.paymentSource && (
               <span
@@ -176,7 +180,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
       ) : (
         <form onSubmit={handleSave} className="flex flex-col gap-5">
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Amount</label>
+            <label className="text-xs text-muted-foreground mb-1 block">{t("amount")}</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
               <input
@@ -192,7 +196,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Description</label>
+            <label className="text-xs text-muted-foreground mb-1 block">{t("description")}</label>
             <input
               type="text"
               value={description}
@@ -202,7 +206,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Date</label>
+            <label className="text-xs text-muted-foreground mb-1 block">{t("date")}</label>
             <input
               type="date"
               value={date}
@@ -226,14 +230,14 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
               onClick={() => setIsEditing(false)}
               className="flex-1 border rounded-xl py-3 text-sm font-medium"
             >
-              Cancel
+              {t("cancel")}
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium disabled:opacity-50"
             >
-              {isSubmitting ? "Saving…" : "Save"}
+              {isSubmitting ? t("saving") : t("save")}
             </button>
           </div>
         </form>

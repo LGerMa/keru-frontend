@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/use-auth";
 import { useSelectedMonth } from "@/context/month-context";
 import { useDashboard } from "@/hooks/use-dashboard";
@@ -28,11 +29,11 @@ import { TrendingUp, Plus } from "lucide-react";
 import type { TagBreakdownTag, BudgetRuleBucket } from "@/types/dashboard";
 import type { PaymentSource } from "@/types/payment-source";
 
-function greeting(): string {
+function greeting(t: ReturnType<typeof useTranslations>): string {
   const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
+  if (h < 12) return t("greetingMorning");
+  if (h < 18) return t("greetingAfternoon");
+  return t("greetingEvening");
 }
 
 // ── Section header ──────────────────────────────────────────
@@ -97,6 +98,8 @@ function DashboardSkeleton() {
 
 // ── Page ────────────────────────────────────────────────────
 export default function DashboardPage() {
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
   const { user } = useAuth();
   const { month } = useSelectedMonth();
   const [selectedTag, setSelectedTag] = useState<TagBreakdownTag | null>(null);
@@ -140,10 +143,10 @@ export default function DashboardPage() {
       {/* ── Page header ── */}
       <div className="mb-5">
         <p className="text-xs text-muted-foreground font-medium mb-1">
-          {greeting()}{firstName ? `, ${firstName}` : ""}
+          {greeting(t)}{firstName ? `, ${firstName}` : ""}
         </p>
         <h1 className="text-2xl font-bold tracking-tight">
-          Where&apos;s your money going?
+          {t("headline")}
         </h1>
       </div>
 
@@ -154,14 +157,14 @@ export default function DashboardPage() {
           className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold shadow-colored"
         >
           <Plus size={15} />
-          Expense
+          {t("quickAddExpense")}
         </Link>
         <Link
           href="/income/new"
           className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-card text-foreground text-sm font-semibold border border-border shadow-card-sm"
         >
           <TrendingUp size={15} />
-          Income
+          {t("quickAddIncome")}
         </Link>
       </div>
 
@@ -190,40 +193,40 @@ export default function DashboardPage() {
       {(tagBreakdowns.length > 0 || budgetStatuses.length > 0 || (!ruleLoading && budgetRule)) && (
         <>
           <SectionHeader
-            label={`Where it went · ${summary ? formatMonth(summary.month) : ""}`}
+            label={t("whereItWent", { month: summary ? formatMonth(summary.month, locale) : "" })}
             action={
               <Link
                 href="/tags"
                 className="text-xs font-semibold text-primary"
               >
-                Manage tags →
+                {t("manageTags")}
               </Link>
             }
           />
           <div className="grid grid-cols-1 gap-4 mb-6">
             {tagBreakdowns.length > 0 && (
               <Card>
-                <p className="text-sm font-bold mb-1">Category breakdown</p>
+                <p className="text-sm font-bold mb-1">{t("categoryBreakdown")}</p>
                 <p className="text-xs text-muted-foreground mb-4">
-                  How your spending is distributed
+                  {t("categoryBreakdownSub")}
                 </p>
                 <CategoryDonut breakdowns={tagBreakdowns} onSelectTag={setSelectedTag} />
               </Card>
             )}
             {budgetStatuses.length > 0 && (
               <Card>
-                <p className="text-sm font-bold mb-1">Budgets</p>
+                <p className="text-sm font-bold mb-1">{t("budgets")}</p>
                 <p className="text-xs text-muted-foreground mb-4">
-                  Progress toward your {summary ? formatMonth(summary.month) : ""} limits
+                  {t("budgetsSub", { month: summary ? formatMonth(summary.month, locale) : "" })}
                 </p>
                 <BudgetOverview statuses={budgetStatuses} />
               </Card>
             )}
             {!ruleLoading && budgetRule && (
               <Card>
-                <p className="text-sm font-bold mb-1">50/30/20 rule</p>
+                <p className="text-sm font-bold mb-1">{t("budgetRule")}</p>
                 <p className="text-xs text-muted-foreground mb-4">
-                  Needs, wants and savings against your income
+                  {t("budgetRuleSub")}
                 </p>
                 <BudgetRuleCard rule={budgetRule} onSelectBucket={(bucketName) => {
                   const b = budgetRule.rule.find((r) => r.bucket === bucketName) ?? null;
@@ -239,21 +242,23 @@ export default function DashboardPage() {
       {paymentSources.length > 0 && (
         <>
           <SectionHeader
-            label="Payment sources"
+            label={t("paymentSources")}
             action={
               <Link
                 href="/payment-sources"
                 className="text-xs font-semibold text-primary"
               >
-                Manage →
+                {t("manage")}
               </Link>
             }
           />
           <div className="mb-6">
             <Card>
-              <p className="text-sm font-bold mb-1">Cards &amp; accounts</p>
+              <p className="text-sm font-bold mb-1">{t("cardsAndAccounts")}</p>
               <p className="text-xs text-muted-foreground mb-4">
-                Tap one to see its {summary ? formatMonth(summary.month) : "this month's"} expenses
+                {summary
+                  ? t("cardsAndAccountsSub", { month: formatMonth(summary.month, locale) })
+                  : t("cardsAndAccountsSubFallback")}
               </p>
               <PaymentSourcesCard sources={paymentSources} onSelect={setSelectedSource} />
             </Card>
@@ -265,7 +270,7 @@ export default function DashboardPage() {
       {trends.length > 1 && (
         <>
           <SectionHeader
-            label="Spending trend · last 6 months"
+            label={t("spendingTrend")}
             action={
               <div className="hidden lg:flex items-center gap-4 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1.5">
@@ -273,14 +278,14 @@ export default function DashboardPage() {
                     className="w-2.5 h-0.5 rounded inline-block"
                     style={{ background: "#6366f1" }}
                   />
-                  Expenses
+                  {t("legendExpenses")}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span
                     className="w-2.5 inline-block"
                     style={{ borderTop: "2px dashed #22C55E" }}
                   />
-                  Income
+                  {t("legendIncome")}
                 </span>
               </div>
             }
@@ -296,13 +301,13 @@ export default function DashboardPage() {
       {recentExpenses.length > 0 && (
         <>
           <SectionHeader
-            label="Transactions"
+            label={t("transactions")}
             action={
               <Link
                 href="/expenses"
                 className="text-xs font-semibold text-primary"
               >
-                All transactions →
+                {t("allTransactions")}
               </Link>
             }
           />
@@ -317,7 +322,7 @@ export default function DashboardPage() {
             <div className="bg-card rounded-2xl shadow-card-md border border-border overflow-hidden px-1">
               {recentExpenses.map((expense) => {
                 const primaryTag = expense.tags[0];
-                const description = expense.description ?? "Expense";
+                const description = expense.description ?? t("expenseFallback");
                 return (
                   <Link
                     key={expense.id}
@@ -338,7 +343,7 @@ export default function DashboardPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{description}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {formatDate(expense.date, { month: "short", day: "numeric" })}
+                        {formatDate(expense.date, { month: "short", day: "numeric" }, locale)}
                         {primaryTag && <span> · {primaryTag.name}</span>}
                       </p>
                     </div>
@@ -357,13 +362,13 @@ export default function DashboardPage() {
       {recurringEntries.length > 0 && (
         <>
           <SectionHeader
-            label="Recurring · upcoming"
+            label={t("recurringUpcoming")}
             action={
               <Link
                 href="/recurring"
                 className="text-xs font-semibold text-primary"
               >
-                Manage →
+                {t("manage")}
               </Link>
             }
           />

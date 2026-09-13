@@ -10,6 +10,7 @@ import {
   updatePaymentSource,
   deletePaymentSource,
 } from "@/hooks/use-payment-sources";
+import { useTranslations } from "next-intl";
 import { EmptyState } from "@/components/app/empty-state";
 import { PAYMENT_METHODS } from "@/lib/constants";
 import type { PaymentMethod } from "@/lib/constants";
@@ -35,12 +36,13 @@ const DEFAULT_FORM: SourceFormState = {
   color: DEFAULT_COLOR,
 };
 
-function methodLabel(method: PaymentMethod | null): string {
-  return PAYMENT_METHODS.find((m) => m.value === method)?.label ?? "No method";
-}
-
 export default function PaymentSourcesPage() {
+  const t = useTranslations("Common");
   const { paymentSources, isLoading, error, refetch } = usePaymentSources();
+
+  function methodLabel(method: PaymentMethod | null): string {
+    return PAYMENT_METHODS.find((m) => m.value === method) ? t(`paymentMethods.${method}`) : t("noMethod");
+  }
 
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState<SourceFormState>(DEFAULT_FORM);
@@ -265,6 +267,7 @@ function SourceForm({
   isSubmitting: boolean;
   submitLabel: string;
 }) {
+  const t = useTranslations("Common");
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div>
@@ -299,7 +302,7 @@ function SourceForm({
                     : {}
                 }
               >
-                {m.label}
+                {t(`paymentMethods.${m.value}`)}
               </button>
             );
           })}

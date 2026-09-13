@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { formatCurrency } from "@/lib/utils";
 import type { BudgetRule, RuleBucketName, RuleStatusLevel } from "@/types/dashboard";
 
@@ -12,17 +15,18 @@ const STATUS_COLOR: Record<RuleStatusLevel, string> = {
   over: "#EF4444",
 };
 
-const BUCKET_LABEL: Record<string, string> = {
-  needs: "Needs",
-  wants: "Wants",
-  savings: "Savings",
-};
-
 export function BudgetRuleCard({ rule, onSelectBucket }: BudgetRuleCardProps) {
+  const t = useTranslations("Dashboard");
+  const BUCKET_LABEL: Record<string, string> = {
+    needs: t("bucketNeeds"),
+    wants: t("bucketWants"),
+    savings: t("bucketSavings"),
+  };
+
   if (rule.income === 0) {
     return (
       <p className="text-sm text-muted-foreground py-4 text-center">
-        No income recorded this month.
+        {t("noIncomeRecorded")}
       </p>
     );
   }

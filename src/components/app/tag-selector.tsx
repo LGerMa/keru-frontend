@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { api } from "@/lib/api";
 import type { Tag } from "@/types/tag";
 
@@ -10,6 +11,7 @@ interface TagSelectorProps {
 }
 
 export function TagSelector({ selected, onChange }: TagSelectorProps) {
+  const t = useTranslations("Common");
   const [tags, setTags] = useState<Tag[]>([]);
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export function TagSelector({ selected, onChange }: TagSelectorProps) {
 
   return (
     <div>
-      <p className="text-xs text-muted-foreground mb-2">Tags</p>
+      <p className="text-xs text-muted-foreground mb-2">{t("tags")}</p>
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => {
           const active = selected.includes(tag.id);

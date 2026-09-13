@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useBudgetRuleTransactions } from "@/hooks/use-budget-rule-transactions";
 import { TransactionItem } from "@/components/app/transaction-item";
 import { EmptyState } from "@/components/app/empty-state";
@@ -13,13 +14,14 @@ interface BudgetRuleTransactionsModalProps {
   onClose: () => void;
 }
 
-const BUCKET_LABEL: Record<string, string> = {
-  needs: "Needs",
-  wants: "Wants",
-  savings: "Savings",
-};
-
 export function BudgetRuleTransactionsModal({ bucket, month, onClose }: BudgetRuleTransactionsModalProps) {
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
+  const BUCKET_LABEL: Record<string, string> = {
+    needs: t("bucketNeeds"),
+    wants: t("bucketWants"),
+    savings: t("bucketSavings"),
+  };
   const { items, meta, isLoading, isLoadingMore, error, loadMore } = useBudgetRuleTransactions(
     bucket?.bucket ?? null,
     month
@@ -39,14 +41,14 @@ export function BudgetRuleTransactionsModal({ bucket, month, onClose }: BudgetRu
         {/* Header */}
         <div className="flex items-center justify-between mb-1">
           <p className="text-sm font-semibold">
-            {label} <span className="text-muted-foreground font-normal">· {bucket.targetPct}% target</span>
+            {label} <span className="text-muted-foreground font-normal">· {bucket.targetPct}% {t("targetPct")}</span>
           </p>
           <button onClick={onClose} className="text-muted-foreground p-1 -mr-1 flex-shrink-0">
             <X size={18} />
           </button>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
-          {formatMonth(month)}
+          {formatMonth(month, locale)}
           <span> · {formatCurrency(bucket.spent)} / {formatCurrency(bucket.target)} ({bucket.percentage}%)</span>
         </p>
 
@@ -66,8 +68,8 @@ export function BudgetRuleTransactionsModal({ bucket, month, onClose }: BudgetRu
 
           {!isLoading && !error && items.length === 0 && (
             <EmptyState
-              title="No transactions"
-              description={`Nothing in the ${label.toLowerCase()} bucket in ${formatMonth(month)}.`}
+              title={t("noTransactions")}
+              description={t("nothingInBucket", { bucket: label.toLowerCase(), month: formatMonth(month, locale) })}
             />
           )}
 
@@ -75,7 +77,7 @@ export function BudgetRuleTransactionsModal({ bucket, month, onClose }: BudgetRu
             <div>
               {bucket.bucket === "savings" && (
                 <p className="text-xs text-muted-foreground py-2">
-                  Saving contributions count toward the target; unplanned expenses (in red) reduce it.
+                  {t("savingsDeductionNote")}
                 </p>
               )}
               {items.map((expense) => (
@@ -91,7 +93,7 @@ export function BudgetRuleTransactionsModal({ bucket, month, onClose }: BudgetRu
                   disabled={isLoadingMore}
                   className="w-full text-xs font-semibold text-primary py-3 disabled:opacity-50"
                 >
-                  {isLoadingMore ? "Loading…" : "Load more"}
+                  {isLoadingMore ? t("loading") : t("loadMore")}
                 </button>
               )}
             </div>

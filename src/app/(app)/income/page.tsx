@@ -3,22 +3,25 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useIncome } from "@/hooks/use-income";
 import { TransactionItem } from "@/components/app/transaction-item";
 import { EmptyState } from "@/components/app/empty-state";
 import { currentMonth, formatMonth } from "@/lib/utils";
 
 export default function IncomePage() {
+  const t = useTranslations("Income");
+  const locale = useLocale();
   const [month, setMonth] = useState<string>(currentMonth());
   const { income, meta, isLoading, error } = useIncome({ month });
 
   return (
     <div className="pt-6">
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-base font-semibold">Income</h1>
+        <h1 className="text-base font-semibold">{t("title")}</h1>
         <Link href="/income/new" className="flex items-center gap-1 text-xs text-primary">
           <Plus size={14} />
-          Add
+          {t("add")}
         </Link>
       </div>
 
@@ -39,7 +42,7 @@ export default function IncomePage() {
                   : {}
               }
             >
-              {formatMonth(m).split(" ")[0]}
+              {formatMonth(m, locale).split(" ")[0]}
             </button>
           );
         })}
@@ -55,11 +58,11 @@ export default function IncomePage() {
 
       {!isLoading && !error && income.length === 0 && (
         <EmptyState
-          title="No income yet"
-          description={`Nothing recorded for ${formatMonth(month)}`}
+          title={t("emptyTitle")}
+          description={t("emptyDescription", { month: formatMonth(month, locale) })}
           action={
             <Link href="/income/new" className="text-xs text-primary underline underline-offset-4">
-              Add your first income
+              {t("emptyAction")}
             </Link>
           }
         />
@@ -75,7 +78,7 @@ export default function IncomePage() {
           ))}
           {meta && (
             <p className="text-xs text-muted-foreground text-center mt-4">
-              {meta.itemCount} entr{meta.itemCount !== 1 ? "ies" : "y"} this month
+              {meta.itemCount === 1 ? t("entryCountOne", { count: meta.itemCount }) : t("entryCountOther", { count: meta.itemCount })}
             </p>
           )}
         </div>

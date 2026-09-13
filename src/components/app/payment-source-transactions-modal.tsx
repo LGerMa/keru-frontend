@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useExpenses } from "@/hooks/use-expenses";
 import { TransactionItem } from "@/components/app/transaction-item";
 import { EmptyState } from "@/components/app/empty-state";
@@ -18,6 +19,8 @@ export function PaymentSourceTransactionsModal({
   month,
   onClose,
 }: PaymentSourceTransactionsModalProps) {
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
   const { expenses, isLoading, error } = useExpenses({
     month,
     paymentSourceId: source?.id,
@@ -49,9 +52,16 @@ export function PaymentSourceTransactionsModal({
           </button>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
-          {formatMonth(month)}
+          {formatMonth(month, locale)}
           {!isLoading && !error && (
-            <span> · {expenses.length} {expenses.length === 1 ? "transaction" : "transactions"} · {formatCurrency(total)}</span>
+            <span>
+              {" "}
+              ·{" "}
+              {expenses.length === 1
+                ? t("transactionCountOne", { count: expenses.length })
+                : t("transactionCountOther", { count: expenses.length })}{" "}
+              · {formatCurrency(total)}
+            </span>
           )}
         </p>
 
@@ -71,8 +81,8 @@ export function PaymentSourceTransactionsModal({
 
           {!isLoading && !error && expenses.length === 0 && (
             <EmptyState
-              title="No transactions"
-              description={`Nothing on "${source.alias}" in ${formatMonth(month)}.`}
+              title={t("noTransactions")}
+              description={t("nothingOnSource", { source: source.alias, month: formatMonth(month, locale) })}
             />
           )}
 

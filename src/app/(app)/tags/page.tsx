@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useTags, createTag, updateTag, deleteTag } from "@/hooks/use-tags";
 import {
   useBudgets,
@@ -36,6 +37,7 @@ function budgetBarColor(pct: number): string {
 }
 
 export default function TagsPage() {
+  const t = useTranslations("Tags");
   const { tags, isLoading, error, refetch } = useTags();
   const { budgets, refetch: refetchBudgets } = useBudgets();
   const { statuses, refetch: refetchStatuses } = useBudgetStatus();
@@ -55,14 +57,14 @@ export default function TagsPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!createForm.name.trim()) { toast.error("Name is required"); return; }
+    if (!createForm.name.trim()) { toast.error(t("nameRequired")); return; }
     setIsCreating(true);
     try {
       const newTag = await createTag({ name: createForm.name.trim(), color: createForm.color });
       refetch();
       setShowCreate(false);
       setCreateForm(DEFAULT_FORM);
-      toast.success("Tag created");
+      toast.success(t("tagCreated"));
 
       // budget is secondary — separate try/catch
       const budgetAmount = parseFloat(createForm.budget);
@@ -72,11 +74,11 @@ export default function TagsPage() {
           refetchBudgets();
           refetchStatuses();
         } catch {
-          toast.error("Tag created, but could not set budget");
+          toast.error(t("tagCreatedBudgetFailed"));
         }
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not create tag");
+      toast.error(err instanceof Error ? err.message : t("createFailed"));
     } finally {
       setIsCreating(false);
     }
@@ -96,13 +98,13 @@ export default function TagsPage() {
   async function handleEdit(e: React.FormEvent) {
     e.preventDefault();
     if (!editingTag) return;
-    if (!editForm.name.trim()) { toast.error("Name is required"); return; }
+    if (!editForm.name.trim()) { toast.error(t("nameRequired")); return; }
     setIsSaving(true);
     try {
       await updateTag(editingTag.id, { name: editForm.name.trim(), color: editForm.color });
       refetch();
       setEditingTag(null);
-      toast.success("Tag updated");
+      toast.success(t("tagUpdated"));
 
       // budget mutations are secondary — separate try/catch
       const existingBudget = budgets.find((b) => b.tag.id === editingTag.id);
@@ -120,10 +122,10 @@ export default function TagsPage() {
         refetchBudgets();
         refetchStatuses();
       } catch {
-        toast.error("Tag updated, but could not save budget");
+        toast.error(t("tagUpdatedBudgetFailed"));
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not update tag");
+      toast.error(err instanceof Error ? err.message : t("updateFailed"));
     } finally {
       setIsSaving(false);
     }
@@ -133,12 +135,12 @@ export default function TagsPage() {
     setDeletingId(id);
     try {
       await deleteTag(id);
-      toast.success("Tag deleted");
+      toast.success(t("tagDeleted"));
       refetchBudgets();
       refetchStatuses();
       refetch();
     } catch (err) {
-      toast.error((err as Error).message ?? "Could not delete tag");
+      toast.error((err as Error).message ?? t("deleteFailed"));
     } finally {
       setDeletingId(null);
     }
@@ -147,13 +149,13 @@ export default function TagsPage() {
   return (
     <div className="pt-6">
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-lg font-bold tracking-tight">Tags</h1>
+        <h1 className="text-lg font-bold tracking-tight">{t("title")}</h1>
         <button
           onClick={() => { setShowCreate(true); setCreateForm(DEFAULT_FORM); }}
           className="flex items-center gap-1 text-xs text-primary font-semibold"
         >
           <Plus size={14} />
-          New tag
+          {t("newTag")}
         </button>
       </div>
 
@@ -161,7 +163,7 @@ export default function TagsPage() {
       {statuses.length > 0 && (
         <div className="bg-card rounded-2xl shadow-card-md border border-border p-4 mb-5">
           <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-muted-foreground">
-            Budgets this month
+            {t("budgetsThisMonth")}
           </p>
           <div className="flex flex-col gap-4">
             {statuses.map((status) => {
@@ -221,14 +223,14 @@ export default function TagsPage() {
 
       {!isLoading && !error && tags.length === 0 && (
         <EmptyState
-          title="No tags yet"
-          description="Create tags to categorize your expenses and income"
+          title={t("emptyTitle")}
+          description={t("emptyDescription")}
           action={
             <button
               onClick={() => setShowCreate(true)}
               className="text-xs text-primary underline underline-offset-4"
             >
-              Create your first tag
+              {t("emptyAction")}
             </button>
           }
         />
@@ -252,7 +254,7 @@ export default function TagsPage() {
                 <button
                   onClick={() => openEdit(tag)}
                   className="text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Edit"
+                  aria-label={t("edit")}
                 >
                   <Pencil size={15} />
                 </button>
@@ -260,7 +262,7 @@ export default function TagsPage() {
                   onClick={() => handleDelete(tag.id)}
                   disabled={deletingId === tag.id}
                   className="text-destructive disabled:opacity-40"
-                  aria-label="Delete"
+                  aria-label={t("delete")}
                 >
                   <Trash2 size={15} />
                 </button>
@@ -272,28 +274,28 @@ export default function TagsPage() {
 
       {/* Create dialog */}
       {showCreate && (
-        <Dialog title="New tag" onClose={() => setShowCreate(false)}>
+        <Dialog title={t("newTagDialogTitle")} onClose={() => setShowCreate(false)}>
           <TagForm
             form={createForm}
             onChange={setCreateForm}
             onSubmit={handleCreate}
             onCancel={() => setShowCreate(false)}
             isSubmitting={isCreating}
-            submitLabel="Create"
+            submitLabel={t("create")}
           />
         </Dialog>
       )}
 
       {/* Edit dialog */}
       {editingTag && (
-        <Dialog title="Edit tag" onClose={() => setEditingTag(null)}>
+        <Dialog title={t("editTagDialogTitle")} onClose={() => setEditingTag(null)}>
           <TagForm
             form={editForm}
             onChange={setEditForm}
             onSubmit={handleEdit}
             onCancel={() => setEditingTag(null)}
             isSubmitting={isSaving}
-            submitLabel="Save"
+            submitLabel={t("save")}
           />
         </Dialog>
       )}
@@ -335,13 +337,14 @@ function TagForm({
   isSubmitting: boolean;
   submitLabel: string;
 }) {
+  const t = useTranslations("Tags");
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div>
-        <label className="text-xs text-muted-foreground mb-1 block">Name</label>
+        <label className="text-xs text-muted-foreground mb-1 block">{t("name")}</label>
         <input
           type="text"
-          placeholder="e.g. Food"
+          placeholder={t("namePlaceholder")}
           value={form.name}
           onChange={(e) => onChange({ ...form, name: e.target.value })}
           className="w-full border rounded-xl px-4 py-3 text-sm bg-transparent focus:outline-none focus:ring-2 focus:ring-primary"
@@ -350,7 +353,7 @@ function TagForm({
       </div>
 
       <div>
-        <label className="text-xs text-muted-foreground mb-2 block">Color</label>
+        <label className="text-xs text-muted-foreground mb-2 block">{t("color")}</label>
         <div className="flex flex-wrap gap-2">
           {PRESET_COLORS.map((c) => (
             <button
@@ -371,18 +374,18 @@ function TagForm({
             className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
             style={{ color: form.color, backgroundColor: `${form.color}20` }}
           >
-            {form.name || "Preview"}
+            {form.name || t("preview")}
           </span>
         </div>
       </div>
 
       <div>
-        <label className="text-xs text-muted-foreground mb-1 block">Budget (optional)</label>
+        <label className="text-xs text-muted-foreground mb-1 block">{t("budgetOptional")}</label>
         <input
           type="number"
           min="0"
           step="0.01"
-          placeholder="No budget"
+          placeholder={t("noBudget")}
           value={form.budget}
           onChange={(e) => onChange({ ...form, budget: e.target.value })}
           className="w-full border rounded-xl px-4 py-3 text-sm bg-transparent focus:outline-none focus:ring-2 focus:ring-primary"
@@ -395,14 +398,14 @@ function TagForm({
           onClick={onCancel}
           className="flex-1 border rounded-xl py-3 text-sm font-medium"
         >
-          Cancel
+          {t("cancel")}
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
           className="flex-1 bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium disabled:opacity-50"
         >
-          {isSubmitting ? "Saving…" : submitLabel}
+          {isSubmitting ? t("saving") : submitLabel}
         </button>
       </div>
     </form>

@@ -5,8 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatCurrency(amount: number, currency = "USD"): string {
-  return new Intl.NumberFormat("en-US", {
+export function formatCurrency(amount: number, currency = "USD", locale = "en-US"): string {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
     minimumFractionDigits: 2,
@@ -14,8 +14,8 @@ export function formatCurrency(amount: number, currency = "USD"): string {
   }).format(amount)
 }
 
-export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOptions): string {
-  return new Intl.DateTimeFormat("en-US", {
+export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOptions, locale = "en-US"): string {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -37,10 +37,10 @@ function parseDateOnly(date: string | Date): Date {
   return new Date(date)
 }
 
-export function formatMonth(month: string): string {
+export function formatMonth(month: string, locale = "en-US"): string {
   // month = "2026-04"
   const [year, m] = month.split("-")
-  return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(
+  return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(
     new Date(Number(year), Number(m) - 1)
   )
 }

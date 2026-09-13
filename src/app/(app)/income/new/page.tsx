@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { createIncome } from "@/hooks/use-income";
 import { TagSelector } from "@/components/app/tag-selector";
 import { IncomeTypeSelect } from "@/components/app/income-type-select";
 import type { IncomeType } from "@/types/income";
 
 export default function NewIncomePage() {
+  const t = useTranslations("Income");
   const router = useRouter();
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
@@ -22,12 +24,12 @@ export default function NewIncomePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!amount || !type) {
-      toast.error("Amount and type are required");
+      toast.error(t("amountAndTypeRequired"));
       return;
     }
     const parsed = parseFloat(amount);
     if (isNaN(parsed) || parsed <= 0) {
-      toast.error("Enter a valid amount");
+      toast.error(t("invalidAmount"));
       return;
     }
 
@@ -40,10 +42,10 @@ export default function NewIncomePage() {
         description: description.trim() || undefined,
         tagIds: tagIds.length > 0 ? tagIds : undefined,
       });
-      toast.success("Income added");
+      toast.success(t("incomeAdded"));
       router.push("/income");
     } catch (err) {
-      toast.error((err as Error).message ?? "Something went wrong");
+      toast.error((err as Error).message ?? t("somethingWentWrong"));
     } finally {
       setIsSubmitting(false);
     }
@@ -55,13 +57,13 @@ export default function NewIncomePage() {
         <Link href="/income" className="text-muted-foreground">
           <ChevronLeft size={20} />
         </Link>
-        <h1 className="text-base font-semibold">New income</h1>
+        <h1 className="text-base font-semibold">{t("newIncome")}</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         {/* Amount */}
         <div>
-          <label className="text-xs text-muted-foreground mb-1 block">Amount</label>
+          <label className="text-xs text-muted-foreground mb-1 block">{t("amount")}</label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
             <input
@@ -80,10 +82,10 @@ export default function NewIncomePage() {
 
         {/* Description */}
         <div>
-          <label className="text-xs text-muted-foreground mb-1 block">Description</label>
+          <label className="text-xs text-muted-foreground mb-1 block">{t("description")}</label>
           <input
             type="text"
-            placeholder="e.g. Monthly salary"
+            placeholder={t("descriptionPlaceholder")}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full border rounded-xl px-4 py-3 text-sm bg-transparent focus:outline-none focus:ring-2 focus:ring-[#22C55E]"
@@ -92,7 +94,7 @@ export default function NewIncomePage() {
 
         {/* Date */}
         <div>
-          <label className="text-xs text-muted-foreground mb-1 block">Date</label>
+          <label className="text-xs text-muted-foreground mb-1 block">{t("date")}</label>
           <input
             type="date"
             value={date}
@@ -113,7 +115,7 @@ export default function NewIncomePage() {
           className="w-full rounded-xl py-3 text-sm font-medium mt-2 disabled:opacity-50 text-white"
           style={{ backgroundColor: "#22C55E" }}
         >
-          {isSubmitting ? "Saving…" : "Save income"}
+          {isSubmitting ? t("saving") : t("saveIncome")}
         </button>
       </form>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { formatCurrency } from "@/lib/utils";
 import type { TagBreakdown, TagBreakdownTag } from "@/types/dashboard";
 
@@ -39,6 +40,7 @@ export function CategoryDonut({
   thickness = 28,
   onSelectTag,
 }: CategoryDonutProps) {
+  const t = useTranslations("Dashboard");
   const [hovered, setHovered] = useState<number | null>(null);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -49,7 +51,7 @@ export function CategoryDonut({
   if (items.length === 0 || total === 0) {
     return (
       <p className="text-sm text-muted-foreground py-4 text-center">
-        No category data for this month.
+        {t("noCategoryData")}
       </p>
     );
   }
@@ -104,7 +106,7 @@ export function CategoryDonut({
         height={size}
         viewBox={`0 0 ${size} ${size}`}
         className="flex-shrink-0"
-        aria-label="Category spending donut chart"
+        aria-label={t("donutAriaLabel")}
         onPointerLeave={() => { setHovered(null); setTooltip(null); }}
       >
         {segments.map((s, i) => (
@@ -132,7 +134,7 @@ export function CategoryDonut({
           letterSpacing="0.1em"
           fontFamily="Inter, ui-sans-serif"
         >
-          SPENT
+          {t("donutCenterLabel")}
         </text>
         <text
           x={cx}
@@ -209,8 +211,7 @@ export function CategoryDonut({
     </div>
 
       <p className="mt-4 text-xs text-muted-foreground/80 leading-snug">
-        An expense with more than one tag is counted under each of them, so
-        category totals can add up to more than the amount spent.
+        {t("multiTagNote")}
       </p>
     </div>
   );
