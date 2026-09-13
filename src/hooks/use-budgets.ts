@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { api } from "@/lib/api";
+import { currentMonth } from "@/lib/utils";
 import type { Budget, BudgetStatus, CreateBudgetDto, UpdateBudgetDto } from "@/types/budget";
 
 interface UseBudgetsReturn {
@@ -54,7 +55,9 @@ interface UseBudgetStatusReturn {
   refetch: () => void;
 }
 
-export function useBudgetStatus(): UseBudgetStatusReturn {
+export function useBudgetStatus(month?: string): UseBudgetStatusReturn {
+  const m = month ?? currentMonth();
+
   const [statuses, setStatuses] = useState<BudgetStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +68,7 @@ export function useBudgetStatus(): UseBudgetStatusReturn {
 
     async function load() {
       try {
-        const data = await api.get<BudgetStatus[]>("/v1/budgets/status");
+        const data = await api.get<BudgetStatus[]>("/v1/budgets/status", { month: m });
         if (cancelled) return;
         setStatuses(data);
         setError(null);
@@ -80,7 +83,7 @@ export function useBudgetStatus(): UseBudgetStatusReturn {
     return () => {
       cancelled = true;
     };
-  }, [tick]);
+  }, [tick, m]);
 
   return {
     statuses,

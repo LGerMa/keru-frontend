@@ -46,8 +46,10 @@ export function QuickStats({
   const dailyAvg =
     daysIntoMonth > 0 ? summary.totalExpenses / daysIntoMonth : 0;
 
-  // Top category by amount
-  const sorted = [...tagBreakdowns].sort((a, b) => b.total - a.total);
+  // Top category by amount (excluding the untagged bucket)
+  const sorted = tagBreakdowns
+    .filter((b) => !b.untagged && b.tag)
+    .sort((a, b) => b.total - a.total);
   const topTag = sorted[0];
 
   // Transaction total
