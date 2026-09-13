@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { createExpense } from "@/hooks/use-expenses";
 import { TagSelector } from "@/components/app/tag-selector";
 import { PaymentMethodSelect } from "@/components/app/payment-method-select";
@@ -13,6 +14,7 @@ import { ExpenseTypeSelect } from "@/components/app/expense-type-select";
 import type { PaymentMethod, ExpenseType } from "@/lib/constants";
 
 export default function NewExpensePage() {
+  const t = useTranslations("Expenses");
   const router = useRouter();
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
@@ -26,12 +28,12 @@ export default function NewExpensePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!amount || !paymentMethod) {
-      toast.error("Amount and payment method are required");
+      toast.error(t("amountAndMethodRequired"));
       return;
     }
     const parsed = parseFloat(amount);
     if (isNaN(parsed) || parsed <= 0) {
-      toast.error("Enter a valid amount");
+      toast.error(t("invalidAmount"));
       return;
     }
 
@@ -46,10 +48,10 @@ export default function NewExpensePage() {
         paymentSourceId: paymentSourceId || undefined,
         type,
       });
-      toast.success("Expense added");
+      toast.success(t("expenseAdded"));
       router.push("/expenses");
     } catch (err) {
-      toast.error((err as Error).message ?? "Something went wrong");
+      toast.error((err as Error).message ?? t("somethingWentWrong"));
     } finally {
       setIsSubmitting(false);
     }
@@ -61,13 +63,13 @@ export default function NewExpensePage() {
         <Link href="/expenses" className="text-muted-foreground">
           <ChevronLeft size={20} />
         </Link>
-        <h1 className="text-base font-semibold">New expense</h1>
+        <h1 className="text-base font-semibold">{t("newExpense")}</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         {/* Amount */}
         <div>
-          <label className="text-xs text-muted-foreground mb-1 block">Amount</label>
+          <label className="text-xs text-muted-foreground mb-1 block">{t("amount")}</label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
             <input
@@ -86,10 +88,10 @@ export default function NewExpensePage() {
 
         {/* Description */}
         <div>
-          <label className="text-xs text-muted-foreground mb-1 block">Description</label>
+          <label className="text-xs text-muted-foreground mb-1 block">{t("description")}</label>
           <input
             type="text"
-            placeholder="What was this for?"
+            placeholder={t("descriptionPlaceholder")}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full border rounded-xl px-4 py-3 text-sm bg-transparent focus:outline-none focus:ring-2 focus:ring-primary"
@@ -98,7 +100,7 @@ export default function NewExpensePage() {
 
         {/* Date */}
         <div>
-          <label className="text-xs text-muted-foreground mb-1 block">Date</label>
+          <label className="text-xs text-muted-foreground mb-1 block">{t("date")}</label>
           <input
             type="date"
             value={date}
@@ -128,7 +130,7 @@ export default function NewExpensePage() {
           disabled={isSubmitting}
           className="w-full bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium mt-2 disabled:opacity-50"
         >
-          {isSubmitting ? "Saving…" : "Save expense"}
+          {isSubmitting ? t("saving") : t("saveExpense")}
         </button>
       </form>
     </div>

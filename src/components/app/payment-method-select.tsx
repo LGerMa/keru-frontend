@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { PAYMENT_METHODS } from "@/lib/constants";
 import type { PaymentMethod } from "@/lib/constants";
 
@@ -7,9 +8,10 @@ interface PaymentMethodSelectProps {
 }
 
 export function PaymentMethodSelect({ value, onChange }: PaymentMethodSelectProps) {
+  const t = useTranslations("Common");
   return (
     <div>
-      <p className="text-xs text-muted-foreground mb-2">Payment method</p>
+      <p className="text-xs text-muted-foreground mb-2">{t("paymentMethod")}</p>
       <div className="flex gap-2 flex-wrap">
         {PAYMENT_METHODS.map((m) => (
           <button
@@ -23,7 +25,7 @@ export function PaymentMethodSelect({ value, onChange }: PaymentMethodSelectProp
                 : {}
             }
           >
-            {m.label}
+            {t(`paymentMethods.${m.value}`)}
           </button>
         ))}
       </div>

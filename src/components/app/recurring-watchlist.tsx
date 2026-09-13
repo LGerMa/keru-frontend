@@ -1,3 +1,6 @@
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
 import { formatCurrency } from "@/lib/utils";
 import { TagBadge } from "@/components/app/tag-badge";
 import type { RecurringEntry } from "@/types/recurring";
@@ -22,27 +25,27 @@ function getStatus(entry: RecurringEntry): Status {
   return "active";
 }
 
-function StatusBadge({ status }: { status: Status }) {
+function StatusBadge({ status, t }: { status: Status; t: ReturnType<typeof useTranslations> }) {
   const styles: Record<Status, { bg: string; fg: string; label: string }> = {
     upcoming: {
       bg: "rgba(99, 102, 241, 0.12)",
       fg: "#6366f1",
-      label: "Upcoming",
+      label: t("statusUpcoming"),
     },
     active: {
       bg: "var(--muted)",
       fg: "var(--muted-foreground)",
-      label: "Scheduled",
+      label: t("statusScheduled"),
     },
     paid: {
       bg: "rgba(34, 197, 94, 0.12)",
       fg: "#22C55E",
-      label: "Paid",
+      label: t("statusPaid"),
     },
     overdue: {
       bg: "rgba(239, 68, 68, 0.12)",
       fg: "#EF4444",
-      label: "Overdue",
+      label: t("statusOverdue"),
     },
   };
   const s = styles[status];
@@ -60,6 +63,9 @@ export function RecurringWatchlist({
   entries,
   limit = 6,
 }: RecurringWatchlistProps) {
+  const t = useTranslations("Dashboard");
+  const tRecurring = useTranslations("Recurring");
+  const locale = useLocale();
   // Show expense entries only, sorted by nextDate asc
   const expenses = entries
     .filter((e) => e.entryType === "expense")
@@ -78,7 +84,7 @@ export function RecurringWatchlist({
   if (expenses.length === 0) {
     return (
       <p className="text-sm text-muted-foreground py-4 text-center">
-        No recurring expenses set up yet.
+        {t("noRecurring")}
       </p>
     );
   }
@@ -86,9 +92,12 @@ export function RecurringWatchlist({
   return (
     <>
       <p className="text-xs text-muted-foreground mb-1">
-        {expenses.length} recurring ·{" "}
+        {expenses.length === 1
+          ? t("recurringCountOne", { count: expenses.length })
+          : t("recurringCountOther", { count: expenses.length })}{" "}
+        ·{" "}
         <strong className="text-foreground">
-          {formatCurrency(totalMonthly)}/mo
+          {formatCurrency(totalMonthly)}{t("perMonth")}
         </strong>
       </p>
       <div>
@@ -97,7 +106,7 @@ export function RecurringWatchlist({
           const primaryTag = entry.tags[0];
           const tagColor = primaryTag?.color ?? "#6366f1";
           const tagName = primaryTag?.name ?? "other";
-          const nextFmt = new Intl.DateTimeFormat("en-US", {
+          const nextFmt = new Intl.DateTimeFormat(locale, {
             month: "short",
             day: "numeric",
           }).format(new Date(entry.nextDate));
@@ -110,13 +119,13 @@ export function RecurringWatchlist({
               <TagBadge color={tagColor} name={tagName} size={32} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold truncate">
-                  {entry.description ?? "Recurring"}
+                  {entry.description ?? t("recurringFallback")}
                 </p>
-                <p className="text-xs text-muted-foreground mt-0.5 capitalize">
-                  {entry.frequency} · next {nextFmt}
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {tRecurring(`frequency.${entry.frequency}`)} · {t("nextDate", { date: nextFmt })}
                 </p>
               </div>
-              <StatusBadge status={status} />
+              <StatusBadge status={status} t={t} />
               <p className="text-sm font-bold tabular-nums min-w-[52px] text-right">
                 {formatCurrency(entry.amount)}
               </p>

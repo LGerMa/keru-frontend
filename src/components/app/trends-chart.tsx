@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { useLocale, useTranslations } from "next-intl";
 import { formatCurrency } from "@/lib/utils";
 import type { MonthTrend } from "@/types/dashboard";
 
@@ -16,23 +17,25 @@ interface TrendsChartProps {
   trends: MonthTrend[];
 }
 
-function shortMonth(month: string): string {
+function shortMonth(month: string, locale: string): string {
   const [year, m] = month.split("-");
-  return new Intl.DateTimeFormat("en-US", { month: "short" }).format(
+  return new Intl.DateTimeFormat(locale, { month: "short" }).format(
     new Date(Number(year), Number(m) - 1)
   );
 }
 
 export function TrendsChart({ trends }: TrendsChartProps) {
-  const data = trends.map((t) => ({
-    month: shortMonth(t.month),
-    income: t.totalIncome,
-    expenses: t.totalExpenses,
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
+  const data = trends.map((trend) => ({
+    month: shortMonth(trend.month, locale),
+    income: trend.totalIncome,
+    expenses: trend.totalExpenses,
   }));
 
   return (
     <div className="mb-5 bg-card rounded-2xl shadow-card-md p-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-3">Spending Trends</p>
+      <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-3">{t("spendingTrends")}</p>
       <ResponsiveContainer width="100%" height={140}>
         <BarChart data={data} barGap={2} barCategoryGap="30%">
           <CartesianGrid vertical={false} stroke="rgba(99,102,241,0.1)" />
@@ -53,8 +56,8 @@ export function TrendsChart({ trends }: TrendsChartProps) {
               boxShadow: "0 2px 12px rgba(99,102,241,0.08)",
             }}
           />
-          <Bar dataKey="income" fill="#22C55E" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="expenses" fill="#6366f1" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="income" name={t("legendIncome")} fill="#22C55E" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="expenses" name={t("legendExpenses")} fill="#6366f1" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

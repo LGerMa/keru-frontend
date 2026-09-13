@@ -1,10 +1,7 @@
+import { useTranslations } from "next-intl";
 import type { IncomeType } from "@/types/income";
 
-const INCOME_TYPES: { value: IncomeType; label: string }[] = [
-  { value: "fixed_monthly",   label: "Monthly" },
-  { value: "fixed_biweekly", label: "Biweekly" },
-  { value: "sporadic",        label: "Sporadic" },
-];
+const INCOME_TYPE_VALUES: IncomeType[] = ["fixed_monthly", "fixed_biweekly", "sporadic"];
 
 interface IncomeTypeSelectProps {
   value: IncomeType | "";
@@ -12,23 +9,29 @@ interface IncomeTypeSelectProps {
 }
 
 export function IncomeTypeSelect({ value, onChange }: IncomeTypeSelectProps) {
+  const t = useTranslations("Common");
+  const incomeTypes: { value: IncomeType; label: string }[] = INCOME_TYPE_VALUES.map((v) => ({
+    value: v,
+    label: t(`incomeTypes.${v}`),
+  }));
+
   return (
     <div>
-      <p className="text-xs text-muted-foreground mb-2">Type</p>
+      <p className="text-xs text-muted-foreground mb-2">{t("type")}</p>
       <div className="flex gap-2 flex-wrap">
-        {INCOME_TYPES.map((t) => (
+        {incomeTypes.map((it) => (
           <button
-            key={t.value}
+            key={it.value}
             type="button"
-            onClick={() => onChange(t.value)}
+            onClick={() => onChange(it.value)}
             className="px-3 py-1.5 rounded-full text-xs font-medium border transition-colors"
             style={
-              value === t.value
+              value === it.value
                 ? { backgroundColor: "#22C55E", color: "#fff", borderColor: "#22C55E" }
                 : {}
             }
           >
-            {t.label}
+            {it.label}
           </button>
         ))}
       </div>

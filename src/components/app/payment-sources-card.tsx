@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { PAYMENT_METHODS } from "@/lib/constants";
 import type { PaymentSource } from "@/types/payment-source";
 
@@ -9,11 +10,13 @@ interface PaymentSourcesCardProps {
   onSelect: (source: PaymentSource) => void;
 }
 
-function methodLabel(method: PaymentSource["paymentMethod"]): string | null {
-  return PAYMENT_METHODS.find((m) => m.value === method)?.label ?? null;
-}
-
 export function PaymentSourcesCard({ sources, onSelect }: PaymentSourcesCardProps) {
+  const t = useTranslations("Common");
+
+  function methodLabel(method: PaymentSource["paymentMethod"]): string | null {
+    return PAYMENT_METHODS.find((m) => m.value === method) ? t(`paymentMethods.${method}`) : null;
+  }
+
   return (
     <div className="flex flex-col">
       {sources.map((source) => {

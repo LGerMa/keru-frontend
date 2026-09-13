@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { usePaymentSources } from "@/hooks/use-payment-sources";
 import type { PaymentMethod } from "@/lib/constants";
 
@@ -12,12 +13,13 @@ interface PaymentSourceSelectProps {
 }
 
 export function PaymentSourceSelect({ value, onChange, onPickMethod }: PaymentSourceSelectProps) {
+  const t = useTranslations("Common");
   const { paymentSources, isLoading } = usePaymentSources();
 
   if (isLoading) {
     return (
       <div>
-        <p className="text-xs text-muted-foreground mb-2">Card / account (optional)</p>
+        <p className="text-xs text-muted-foreground mb-2">{t("cardOrAccountOptional")}</p>
         <div className="h-8 rounded-full bg-muted animate-pulse w-40" />
       </div>
     );
@@ -26,9 +28,9 @@ export function PaymentSourceSelect({ value, onChange, onPickMethod }: PaymentSo
   if (paymentSources.length === 0) {
     return (
       <div>
-        <p className="text-xs text-muted-foreground mb-2">Card / account (optional)</p>
+        <p className="text-xs text-muted-foreground mb-2">{t("cardOrAccountOptional")}</p>
         <Link href="/payment-sources" className="text-xs text-primary font-semibold underline underline-offset-4">
-          Add a payment source
+          {t("addPaymentSource")}
         </Link>
       </div>
     );
@@ -36,7 +38,7 @@ export function PaymentSourceSelect({ value, onChange, onPickMethod }: PaymentSo
 
   return (
     <div>
-      <p className="text-xs text-muted-foreground mb-2">Card / account (optional)</p>
+      <p className="text-xs text-muted-foreground mb-2">{t("cardOrAccountOptional")}</p>
       <div className="flex gap-2 flex-wrap">
         <button
           type="button"
@@ -48,7 +50,7 @@ export function PaymentSourceSelect({ value, onChange, onPickMethod }: PaymentSo
               : {}
           }
         >
-          None
+          {t("none")}
         </button>
         {paymentSources.map((s) => {
           const selected = value === s.id;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { formatCurrency } from "@/lib/utils";
 import type { TagBreakdown, TagBreakdownTag } from "@/types/dashboard";
 
@@ -39,9 +40,12 @@ export function CategoryDonut({
   thickness = 28,
   onSelectTag,
 }: CategoryDonutProps) {
+  const t = useTranslations("Dashboard");
   const [hovered, setHovered] = useState<number | null>(null);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const [infoHovered, setInfoHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const noteRef = useRef<HTMLParagraphElement>(null);
 
   const items = breakdowns.filter((b) => !b.untagged && b.total > 0);
   const total = items.reduce((s, b) => s + b.total, 0);
@@ -49,7 +53,7 @@ export function CategoryDonut({
   if (items.length === 0 || total === 0) {
     return (
       <p className="text-sm text-muted-foreground py-4 text-center">
-        No category data for this month.
+        {t("noCategoryData")}
       </p>
     );
   }
@@ -104,7 +108,7 @@ export function CategoryDonut({
         height={size}
         viewBox={`0 0 ${size} ${size}`}
         className="flex-shrink-0"
-        aria-label="Category spending donut chart"
+        aria-label={t("donutAriaLabel")}
         onPointerLeave={() => { setHovered(null); setTooltip(null); }}
       >
         {segments.map((s, i) => (
@@ -115,15 +119,24 @@ export function CategoryDonut({
             stroke={s.color}
             strokeWidth={hovered === i ? thickness + 4 : thickness}
             strokeLinecap="butt"
+            pointerEvents="stroke"
             onClick={onSelectTag ? () => onSelectTag(s.tag) : undefined}
             onPointerEnter={() => setHovered(i)}
             onPointerMove={(e) => showTooltip(s, e)}
             className={`transition-[stroke-width] duration-150 ${onSelectTag ? "cursor-pointer" : ""}`}
           />
         ))}
+        {/* Blocks the center hole from re-triggering the last segment's hover */}
+        <circle
+          cx={cx}
+          cy={cy}
+          r={r - thickness / 2}
+          fill="transparent"
+          onPointerEnter={() => { setHovered(null); setTooltip(null); }}
+        />
         {/* Center label */}
         <text
-          x={cx}
+          x={cx - 6}
           y={cy - 8}
           textAnchor="middle"
           fontSize="10"
@@ -132,7 +145,7 @@ export function CategoryDonut({
           letterSpacing="0.1em"
           fontFamily="Inter, ui-sans-serif"
         >
-          SPENT
+          {t("donutCenterLabel")}
         </text>
         <text
           x={cx}
@@ -146,6 +159,39 @@ export function CategoryDonut({
         >
           {formatCurrency(total)}
         </text>
+        <g
+          role="button"
+          tabIndex={0}
+          aria-label={t("multiTagNote")}
+          onPointerEnter={() => setInfoHovered(true)}
+          onPointerLeave={() => setInfoHovered(false)}
+          onFocus={() => setInfoHovered(true)}
+          onBlur={() => setInfoHovered(false)}
+          onClick={() => noteRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" })}
+          className="cursor-pointer"
+        >
+          <circle
+            cx={cx + 30}
+            cy={cy - 11}
+            r={6}
+            fill="none"
+            stroke={infoHovered ? "var(--foreground)" : "var(--muted-foreground)"}
+            strokeWidth={1.3}
+            className="transition-colors"
+          />
+          <text
+            x={cx + 30}
+            y={cy - 8}
+            textAnchor="middle"
+            fontSize="8"
+            fontWeight="700"
+            fill={infoHovered ? "var(--foreground)" : "var(--muted-foreground)"}
+            fontFamily="Inter, ui-sans-serif"
+            className="transition-colors"
+          >
+            i
+          </text>
+        </g>
       </svg>
 
       {/* Legend */}
@@ -208,9 +254,13 @@ export function CategoryDonut({
       )}
     </div>
 
-      <p className="mt-4 text-xs text-muted-foreground/80 leading-snug">
-        An expense with more than one tag is counted under each of them, so
-        category totals can add up to more than the amount spent.
+      <p
+        ref={noteRef}
+        className={`mt-4 text-xs leading-snug rounded-md transition-colors ${
+          infoHovered ? "text-foreground bg-muted -mx-1 px-1 py-0.5" : "text-muted-foreground/80"
+        }`}
+      >
+        {t("multiTagNote")}
       </p>
     </div>
   );

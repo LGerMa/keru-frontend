@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { formatCurrency } from "@/lib/utils";
 import type { BudgetStatus } from "@/types/budget";
 
@@ -13,14 +16,18 @@ function barColor(pct: number): string {
 }
 
 export function BudgetOverview({ statuses }: BudgetOverviewProps) {
+  const t = useTranslations("Dashboard");
   if (statuses.length === 0) return null;
+
+  const totalSpent = statuses.reduce((sum, s) => sum + s.spent, 0);
+  const totalBudget = statuses.reduce((sum, s) => sum + s.budget, 0);
 
   return (
     <div className="mb-5">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-semibold uppercase tracking-wider text-foreground">Budgets</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-foreground">{t("budgets")}</p>
         <Link href="/tags" className="text-xs text-primary font-semibold">
-          Manage
+          {t("budgetsManage")}
         </Link>
       </div>
       <div className="bg-card rounded-2xl shadow-card-md border border-border overflow-hidden px-4 py-3 flex flex-col gap-3">
@@ -56,6 +63,14 @@ export function BudgetOverview({ statuses }: BudgetOverviewProps) {
             </div>
           );
         })}
+        <div className="flex items-center justify-between pt-1 mt-1 border-t border-border">
+          <span className="text-xs font-semibold text-foreground">{t("budgetsTotal")}</span>
+          <span className="text-xs font-semibold text-foreground">
+            {formatCurrency(totalSpent)}
+            <span className="text-muted-foreground/50"> / </span>
+            {formatCurrency(totalBudget)}
+          </span>
+        </div>
       </div>
     </div>
   );

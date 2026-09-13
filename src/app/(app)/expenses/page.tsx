@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Plus, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useExpenses } from "@/hooks/use-expenses";
 import { useIncome } from "@/hooks/use-income";
 import { usePaymentSources } from "@/hooks/use-payment-sources";
@@ -22,6 +23,9 @@ const MONTHS = Array.from({ length: 6 }, (_, i) => {
 });
 
 export default function HistoryPage() {
+  const t = useTranslations("Expenses");
+  const tCommon = useTranslations("Common");
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>("expenses");
   const [month, setMonth] = useState<string>(currentMonth());
@@ -46,13 +50,13 @@ export default function HistoryPage() {
   const items     = tab === "expenses" ? expenses   : income;
   const meta      = tab === "expenses" ? expMeta    : incMeta;
   const addHref   = tab === "expenses" ? "/expenses/new" : "/income/new";
-  const addLabel  = tab === "expenses" ? "Add expense"   : "Add income";
-  const emptyTitle = tab === "expenses" ? "No expenses yet" : "No income yet";
+  const addLabel  = tab === "expenses" ? t("addExpense")   : t("addIncome");
+  const emptyTitle = tab === "expenses" ? t("emptyTitleExpenses") : t("emptyTitleIncome");
   const count = meta?.itemCount ?? 0;
   const countLabel =
     tab === "expenses"
-      ? `${count} ${count === 1 ? "expense" : "expenses"} this month`
-      : `${count} ${count === 1 ? "entry" : "entries"} this month`;
+      ? (count === 1 ? t("expenseCountOne", { count }) : t("expenseCountOther", { count }))
+      : (count === 1 ? t("entryCountOne", { count }) : t("entryCountOther", { count }));
 
   const isIncome = tab === "income";
 
@@ -60,21 +64,21 @@ export default function HistoryPage() {
     <>
       {/* Tab switcher */}
       <div className="flex gap-1 mb-5 bg-card rounded-xl p-1 border border-border">
-        {(["expenses", "income"] as Tab[]).map((t) => (
+        {(["expenses", "income"] as Tab[]).map((tabValue) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tabValue}
+            onClick={() => setTab(tabValue)}
             className={cn(
               "flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors capitalize",
-              tab === t
-                ? t === "income"
+              tab === tabValue
+                ? tabValue === "income"
                   ? "text-white"
                   : "bg-primary text-primary-foreground"
                 : "text-muted-foreground"
             )}
-            style={tab === t && t === "income" ? { backgroundColor: "#22C55E" } : {}}
+            style={tab === tabValue && tabValue === "income" ? { backgroundColor: "#22C55E" } : {}}
           >
-            {t === "expenses" ? "Expenses" : "Income"}
+            {tabValue === "expenses" ? t("tabExpenses") : t("tabIncome")}
           </button>
         ))}
       </div>
@@ -82,7 +86,7 @@ export default function HistoryPage() {
       {/* Active tag filter */}
       {tagFilter && (
         <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <span className="text-xs text-muted-foreground">Filtered by:</span>
+          <span className="text-xs text-muted-foreground">{t("filteredBy")}</span>
           <button
             onClick={() => setTagFilter("")}
             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary"
@@ -96,10 +100,10 @@ export default function HistoryPage() {
       {/* Payment source filter — expenses tab only */}
       {tab === "expenses" && paymentSources.length > 0 && (
         <div className="mb-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-2 hidden lg:block">Payment source</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-2 hidden lg:block">{t("paymentSource")}</p>
           {activeSource ? (
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-muted-foreground lg:hidden">Payment source:</span>
+              <span className="text-xs text-muted-foreground lg:hidden">{t("paymentSourceColon")}</span>
               <button
                 onClick={() => setPaymentSourceId("")}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
@@ -119,7 +123,7 @@ export default function HistoryPage() {
               onChange={(e) => setPaymentSourceId(e.target.value)}
               className="w-full lg:w-auto border border-border rounded-full bg-card text-xs font-medium px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
-              <option value="">All payment sources</option>
+              <option value="">{t("allPaymentSources")}</option>
               {paymentSources.map((s) => (
                 <option key={s.id} value={s.id}>{s.alias}</option>
               ))}
@@ -131,17 +135,17 @@ export default function HistoryPage() {
       {/* Type filter — expenses tab only */}
       {tab === "expenses" && (
         <div className="mb-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-2 hidden lg:block">Type</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-2 hidden lg:block">{t("type")}</p>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-muted-foreground lg:hidden">Type:</span>
+            <span className="text-xs text-muted-foreground lg:hidden">{t("typeColon")}</span>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               className="w-full lg:w-auto border border-border rounded-full bg-card text-xs font-medium px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
-              <option value="">All types</option>
-              {EXPENSE_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
+              <option value="">{t("allTypes")}</option>
+              {EXPENSE_TYPES.map((et) => (
+                <option key={et.value} value={et.value}>{tCommon(`expenseTypes.${et.value}`)}</option>
               ))}
             </select>
           </div>
@@ -150,7 +154,7 @@ export default function HistoryPage() {
 
       {/* Month picker */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-2 hidden lg:block">Month</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-2 hidden lg:block">{t("month")}</p>
         {/* Mobile: horizontal scroll pill chips */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none lg:hidden">
           {MONTHS.map((m) => {
@@ -167,7 +171,7 @@ export default function HistoryPage() {
                 )}
                 style={isSelected && isIncome ? { backgroundColor: "#22C55E", borderColor: "#22C55E" } : {}}
               >
-                {formatMonth(m).split(" ")[0]}
+                {formatMonth(m, locale).split(" ")[0]}
               </button>
             );
           })}
@@ -188,7 +192,7 @@ export default function HistoryPage() {
                 )}
                 style={isSelected && isIncome ? { backgroundColor: "#22C55E" } : {}}
               >
-                {formatMonth(m)}
+                {formatMonth(m, locale)}
               </button>
             );
           })}
@@ -208,10 +212,10 @@ export default function HistoryPage() {
       {!isLoading && !error && items.length === 0 && (
         <EmptyState
           title={emptyTitle}
-          description={`Nothing recorded for ${formatMonth(month)}`}
+          description={t("nothingRecorded", { month: formatMonth(month, locale) })}
           action={
             <Link href={addHref} className="text-xs text-primary font-semibold underline underline-offset-4">
-              Add now
+              {t("addNow")}
             </Link>
           }
         />
@@ -238,7 +242,7 @@ export default function HistoryPage() {
   return (
     <div className="pt-6">
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-lg font-bold tracking-tight">History</h1>
+        <h1 className="text-lg font-bold tracking-tight">{t("historyTitle")}</h1>
         <Link href={addHref} className="flex items-center gap-1 text-xs text-primary font-semibold">
           <Plus size={14} />
           {addLabel}

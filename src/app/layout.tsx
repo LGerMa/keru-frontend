@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
 import { AuthProvider } from "@/context/auth-context";
 import "./globals.css";
 
@@ -14,15 +16,19 @@ export const metadata: Metadata = {
   description: "A mobile-first personal finance tracker.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
+    <html lang={locale} className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <AuthProvider>{children}</AuthProvider>
+        <NextIntlClientProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

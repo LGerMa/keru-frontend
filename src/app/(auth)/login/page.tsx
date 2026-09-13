@@ -3,11 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/use-auth";
 import { ApiClientError } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 
 export default function LoginPage() {
+  const t = useTranslations("Auth");
   const { login } = useAuth();
   const router = useRouter();
 
@@ -27,7 +29,7 @@ export default function LoginPage() {
       if (err instanceof ApiClientError) {
         setError(err.message);
       } else {
-        setError("Something went wrong. Please try again.");
+        setError(t("signInError"));
       }
     } finally {
       setIsLoading(false);
@@ -48,14 +50,14 @@ export default function LoginPage() {
           <h1 className="text-2xl font-extrabold tracking-tight">
             keru<span className="text-primary">.</span>
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Keep Expenses Recorded & Understood</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("tagline")}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <Input
           type="email"
-          placeholder="Email address"
+          placeholder={t("emailPlaceholder")}
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -63,7 +65,7 @@ export default function LoginPage() {
         />
         <Input
           type="password"
-          placeholder="Password"
+          placeholder={t("passwordPlaceholder")}
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -79,14 +81,14 @@ export default function LoginPage() {
           disabled={isLoading}
           className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold shadow-colored transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none mt-1"
         >
-          {isLoading ? "Signing in…" : "Sign in"}
+          {isLoading ? t("signingIn") : t("signIn")}
         </button>
       </form>
 
       <p className="text-sm text-center text-muted-foreground">
-        Don&apos;t have an account?{" "}
+        {t("noAccount")}{" "}
         <Link href="/register" className="text-primary font-semibold">
-          Register
+          {t("register")}
         </Link>
       </p>
     </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/use-auth";
 import { MonthProvider, useSelectedMonth } from "@/context/month-context";
 import {
@@ -13,11 +14,11 @@ import Link from "next/link";
 import { cn, formatMonth } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", icon: Home,    label: "Dashboard" },
-  { href: "/expenses",  icon: List,    label: "Transactions" },
-  { href: "/recurring", icon: Repeat2, label: "Recurring" },
-  { href: "/tags",      icon: Tag,     label: "Tags" },
-  { href: "/profile",   icon: User,    label: "Profile" },
+  { href: "/dashboard", icon: Home,    labelKey: "dashboard" as const },
+  { href: "/expenses",  icon: List,    labelKey: "transactions" as const },
+  { href: "/recurring", icon: Repeat2, labelKey: "recurring" as const },
+  { href: "/tags",      icon: Tag,     labelKey: "tags" as const },
+  { href: "/profile",   icon: User,    labelKey: "profile" as const },
 ];
 
 // ── Last 12 months, most recent first (as "YYYY-MM") ───────────
@@ -30,6 +31,7 @@ const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => {
 // ── Month chip + dropdown ───────────────────────────────────────
 function MonthChip() {
   const { month, setMonth } = useSelectedMonth();
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -60,7 +62,7 @@ function MonthChip() {
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
         </svg>
-        {formatMonth(month)}
+        {formatMonth(month, locale)}
         <ChevronDown size={11} />
       </button>
 
@@ -77,7 +79,7 @@ function MonthChip() {
                   : "text-foreground hover:bg-muted"
               )}
             >
-              {formatMonth(m)}
+              {formatMonth(m, locale)}
             </button>
           ))}
         </div>
@@ -90,6 +92,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const tNav = useTranslations("Nav");
   const [fabOpen, setFabOpen] = useState(false);
 
   // ── Dark mode ────────────────────────────────────────────
@@ -162,24 +165,24 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
             style={{ background: "#22C55E" }}
           >
             <TrendingUp size={13} strokeWidth={2.5} />
-            Income
+            {tNav("income")}
           </Link>
           <Link
             href="/expenses/new"
             className="flex flex-1 items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold text-primary-foreground bg-primary shadow-colored transition-transform hover:scale-105 active:scale-95"
           >
             <Plus size={13} strokeWidth={2.5} />
-            Expense
+            {tNav("expense")}
           </Link>
         </div>
 
         {/* Nav section label */}
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 mb-1.5">
-            Workspace
+            {tNav("workspace")}
           </p>
           <nav className="flex flex-col gap-0.5">
-            {NAV_ITEMS.map(({ href, icon: Icon, label }) => (
+            {NAV_ITEMS.map(({ href, icon: Icon, labelKey }) => (
               <Link
                 key={href}
                 href={href}
@@ -191,7 +194,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
                 )}
               >
                 <Icon size={16} />
-                {label}
+                {tNav(labelKey)}
               </Link>
             ))}
           </nav>
@@ -238,7 +241,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
             />
             <input
               type="search"
-              placeholder="Search transactions, tags…"
+              placeholder={tNav("searchPlaceholder")}
               className="w-full pl-9 pr-3 py-2 rounded-[10px] border border-border bg-card text-foreground text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-shadow"
             />
           </div>
@@ -256,7 +259,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
           {/* Dark mode toggle */}
           <button
             onClick={() => setDark((d) => !d)}
-            title={dark ? "Switch to light mode" : "Switch to dark mode"}
+            title={dark ? tNav("switchToLight") : tNav("switchToDark")}
             className="w-9 h-9 flex items-center justify-center rounded-[10px] bg-card border border-border hover:bg-muted transition-colors"
           >
             {dark ? <Sun size={15} /> : <Moon size={15} />}
@@ -270,7 +273,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
 
         {/* ── Bottom nav — mobile only ───────────────────── */}
         <nav className="lg:hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-card border-t flex items-center justify-around h-16 px-2 z-50">
-          {NAV_ITEMS.slice(0, 2).map(({ href, icon: Icon, label }) => (
+          {NAV_ITEMS.slice(0, 2).map(({ href, icon: Icon, labelKey }) => (
             <Link
               key={href}
               href={href}
@@ -282,7 +285,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
               )}
             >
               <Icon size={22} />
-              <span>{label}</span>
+              <span>{tNav(labelKey)}</span>
             </Link>
           ))}
 
@@ -303,7 +306,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
                     style={{ backgroundColor: "#22C55E" }}
                   >
                     <TrendingUp size={14} />
-                    Income
+                    {tNav("income")}
                   </Link>
                   <Link
                     href="/expenses/new"
@@ -311,7 +314,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
                     className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold text-white shadow-colored whitespace-nowrap bg-primary"
                   >
                     <Plus size={14} />
-                    Expense
+                    {tNav("expense")}
                   </Link>
                 </div>
               </>
@@ -330,7 +333,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
             </button>
           </div>
 
-          {NAV_ITEMS.slice(2).map(({ href, icon: Icon, label }) => (
+          {NAV_ITEMS.slice(2).map(({ href, icon: Icon, labelKey }) => (
             <Link
               key={href}
               href={href}
@@ -342,7 +345,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
               )}
             >
               <Icon size={22} />
-              <span>{label}</span>
+              <span>{tNav(labelKey)}</span>
             </Link>
           ))}
         </nav>

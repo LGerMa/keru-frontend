@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { TagBadge } from "@/components/app/tag-badge";
 import type { Expense } from "@/types/expense";
@@ -55,6 +56,9 @@ export function TransactionsTable({
   expenses,
   pageSize = 8,
 }: TransactionsTableProps) {
+  const t = useTranslations("Dashboard");
+  const tCommon = useTranslations("Common");
+  const locale = useLocale();
   const [sortKey, setSortKey] = useState<SortKey>("date");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [page, setPage] = useState(0);
@@ -138,7 +142,7 @@ export function TransactionsTable({
   if (expenses.length === 0) {
     return (
       <p className="text-sm text-muted-foreground text-center py-8">
-        No transactions this month.
+        {t("noTransactionsThisMonth")}
       </p>
     );
   }
@@ -149,17 +153,17 @@ export function TransactionsTable({
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <Th k="date">Date</Th>
-              <Th k="description">Description</Th>
-              <Th k="tag">Category</Th>
-              <Th k="method">Method</Th>
-              <Th k="amount" right>Amount</Th>
+              <Th k="date">{t("columnDate")}</Th>
+              <Th k="description">{t("columnDescription")}</Th>
+              <Th k="tag">{t("columnCategory")}</Th>
+              <Th k="method">{t("columnMethod")}</Th>
+              <Th k="amount" right>{t("columnAmount")}</Th>
             </tr>
           </thead>
           <tbody>
             {pageRows.map((expense) => {
               const primaryTag = expense.tags[0];
-              const description = expense.description ?? "Expense";
+              const description = expense.description ?? t("expenseFallback");
               const tagColor = primaryTag?.color ?? "#6366f1";
               const tagName = primaryTag?.name ?? "other";
 
@@ -169,7 +173,7 @@ export function TransactionsTable({
                   className="hover:bg-muted/40 transition-colors group"
                 >
                   <td className={`${tdClass} text-muted-foreground tabular-nums whitespace-nowrap`}>
-                    {formatDate(expense.date, { month: "short", day: "numeric" })}
+                    {formatDate(expense.date, { month: "short", day: "numeric" }, locale)}
                   </td>
                   <td className={tdClass}>
                     <Link
@@ -201,8 +205,8 @@ export function TransactionsTable({
                       <span className="text-muted-foreground text-xs">—</span>
                     )}
                   </td>
-                  <td className={`${tdClass} text-muted-foreground whitespace-nowrap capitalize`}>
-                    {expense.paymentMethod.replace("_", " ")}
+                  <td className={`${tdClass} text-muted-foreground whitespace-nowrap`}>
+                    {tCommon(`paymentMethods.${expense.paymentMethod}`)}
                   </td>
                   <td
                     className={`${tdClass} text-right font-bold tabular-nums whitespace-nowrap text-foreground`}
@@ -219,8 +223,11 @@ export function TransactionsTable({
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 text-xs text-muted-foreground">
           <span>
-            {page * pageSize + 1}–
-            {Math.min((page + 1) * pageSize, sorted.length)} of {sorted.length}
+            {t("paginationRange", {
+              from: page * pageSize + 1,
+              to: Math.min((page + 1) * pageSize, sorted.length),
+              total: sorted.length,
+            })}
           </span>
           <div className="flex gap-2">
             <button
@@ -228,14 +235,14 @@ export function TransactionsTable({
               disabled={page === 0}
               onClick={() => setPage((p) => p - 1)}
             >
-              ← Prev
+              {t("prev")}
             </button>
             <button
               className="px-3 py-1.5 rounded-lg border border-border bg-card text-foreground text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-muted transition-colors"
               disabled={page >= totalPages - 1}
               onClick={() => setPage((p) => p + 1)}
             >
-              Next →
+              {t("next")}
             </button>
           </div>
         </div>

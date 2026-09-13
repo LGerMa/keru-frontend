@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { formatCurrency, formatMonth } from "@/lib/utils";
 import type { DashboardSummary, MonthTrend } from "@/types/dashboard";
 
@@ -11,6 +12,7 @@ interface HeroCardProps {
 
 // Inline sparkline — draws the last N months of expenses as a small area chart
 function Sparkline({ trends }: { trends: MonthTrend[] }) {
+  const locale = useLocale();
   if (trends.length < 2) return null;
   // Chart area is W×H; PAD_X leaves room for the end labels, LABEL_H for the month row.
   const W = 220, H = 60, PAD_X = 14, LABEL_H = 14;
@@ -63,7 +65,7 @@ function Sparkline({ trends }: { trends: MonthTrend[] }) {
         const isLast = i === trends.length - 1;
         const isMid = i === Math.floor((trends.length - 1) / 2);
         if (!isFirst && !isLast && !isMid) return null;
-        const label = new Intl.DateTimeFormat("en-US", { month: "short" }).format(
+        const label = new Intl.DateTimeFormat(locale, { month: "short" }).format(
           new Date(t.month + "-01")
         );
         return (
@@ -85,6 +87,8 @@ function Sparkline({ trends }: { trends: MonthTrend[] }) {
 }
 
 export function HeroCard({ summary, trends, balanceDelta }: HeroCardProps) {
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
   const savingsRate =
     summary.totalIncome > 0
       ? ((summary.balance / summary.totalIncome) * 100).toFixed(1)
@@ -114,7 +118,7 @@ export function HeroCard({ summary, trends, balanceDelta }: HeroCardProps) {
             className="text-xs font-semibold uppercase tracking-widest mb-2"
             style={{ color: "rgba(255,255,255,0.65)" }}
           >
-            Balance · {formatMonth(summary.month)}
+            {t("heroBalance", { month: formatMonth(summary.month, locale) })}
           </p>
           <p
             className="text-white font-extrabold leading-none"
@@ -125,7 +129,7 @@ export function HeroCard({ summary, trends, balanceDelta }: HeroCardProps) {
           <div className="flex gap-6 mt-5">
             <div>
               <p className="text-xs font-medium mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
-                Income
+                {t("heroIncome")}
               </p>
               <p className="text-lg font-bold" style={{ color: "#bbf7d0" }}>
                 +{formatCurrency(summary.totalIncome)}
@@ -134,7 +138,7 @@ export function HeroCard({ summary, trends, balanceDelta }: HeroCardProps) {
             <div className="w-px" style={{ background: "rgba(255,255,255,0.2)" }} />
             <div>
               <p className="text-xs font-medium mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
-                Expenses
+                {t("heroExpenses")}
               </p>
               <p className="text-lg font-bold text-white/95">
                 -{formatCurrency(summary.totalExpenses)}
@@ -143,7 +147,7 @@ export function HeroCard({ summary, trends, balanceDelta }: HeroCardProps) {
             <div className="w-px" style={{ background: "rgba(255,255,255,0.2)" }} />
             <div>
               <p className="text-xs font-medium mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
-                Savings rate
+                {t("heroSavingsRate")}
               </p>
               <p className="text-lg font-bold text-white">{savingsRate}%</p>
             </div>
@@ -173,7 +177,7 @@ export function HeroCard({ summary, trends, balanceDelta }: HeroCardProps) {
                 )}
               </svg>
               {deltaPositive ? "+" : ""}
-              {balanceDelta!.toFixed(1)}% vs last month
+              {balanceDelta!.toFixed(1)}% {t("heroVsLastMonth")}
             </div>
           )}
           <Sparkline trends={trends} />

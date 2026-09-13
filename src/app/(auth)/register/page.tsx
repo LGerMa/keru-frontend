@@ -3,11 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/use-auth";
 import { ApiClientError } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 
 export default function RegisterPage() {
+  const t = useTranslations("Auth");
   const { register } = useAuth();
   const router = useRouter();
 
@@ -28,7 +30,7 @@ export default function RegisterPage() {
       if (err instanceof ApiClientError) {
         setError(err.message);
       } else {
-        setError("Something went wrong. Please try again.");
+        setError(t("signInError"));
       }
     } finally {
       setIsLoading(false);
@@ -49,14 +51,14 @@ export default function RegisterPage() {
           <h1 className="text-2xl font-extrabold tracking-tight">
             keru<span className="text-primary">.</span>
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Keep Expenses Recorded & Understood</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("tagline")}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <Input
           type="text"
-          placeholder="Name"
+          placeholder={t("namePlaceholder")}
           autoComplete="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -64,7 +66,7 @@ export default function RegisterPage() {
         />
         <Input
           type="email"
-          placeholder="Email address"
+          placeholder={t("emailPlaceholder")}
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -72,7 +74,7 @@ export default function RegisterPage() {
         />
         <Input
           type="password"
-          placeholder="Password"
+          placeholder={t("passwordPlaceholder")}
           autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -88,14 +90,14 @@ export default function RegisterPage() {
           disabled={isLoading}
           className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold shadow-colored transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none mt-1"
         >
-          {isLoading ? "Creating account…" : "Create account"}
+          {isLoading ? t("creatingAccount") : t("createAccount")}
         </button>
       </form>
 
       <p className="text-sm text-center text-muted-foreground">
-        Already have an account?{" "}
+        {t("haveAccount")}{" "}
         <Link href="/login" className="text-primary font-semibold">
-          Sign in
+          {t("login")}
         </Link>
       </p>
     </div>
