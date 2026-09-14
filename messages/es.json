@@ -330,5 +330,199 @@
     "expenseUpdated": "Gasto actualizado",
     "loadFailed": "No se pudo cargar el gasto",
     "notFound": "Gasto no encontrado."
+  },
+  "LandingNav": {
+    "how": "Cómo funciona",
+    "features": "Funciones",
+    "pricing": "Precios",
+    "faq": "FAQ"
+  },
+  "LandingFooter": {
+    "privacy": "Privacidad",
+    "terms": "Términos",
+    "contact": "Contacto",
+    "changelog": "Changelog",
+    "copyright": "© 2026 Keru"
+  },
+  "Pricing": {
+    "eyebrow": "Precios",
+    "title": "Gratis para empezar. Pro cuando quieras presupuestos.",
+    "monthly": "Mensual",
+    "yearly": "Anual",
+    "save": "Ahorra 20% al año",
+    "forever": "Para siempre",
+    "perMonth": "por mes",
+    "perYear": "por año",
+    "free": {
+      "name": "Free",
+      "has": [
+        "Gastos e ingresos ilimitados",
+        "Desglose por categoría y tendencias",
+        "Etiquetas con color e icono"
+      ],
+      "hasNot": [
+        "Historial limitado a 3 meses",
+        "Sin presupuestos por etiqueta",
+        "Sin análisis 50/30/20"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "has": [
+        "Todo lo de Free",
+        "Historial completo, sin límite",
+        "Presupuestos por etiqueta con alertas",
+        "Análisis 50/30/20 automático",
+        "Seguimiento de gastos recurrentes"
+      ]
+    }
+  },
+  "Landing": {
+    "cta": {
+      "primary": "Empieza gratis",
+      "secondary": "Ver cómo se ve",
+      "login": "Iniciar sesión",
+      "pro": "Pasar a Pro"
+    },
+    "hero": {
+      "eyebrow": "Sin plantillas de Excel",
+      "headline": "Deja de adivinar en <em>qué gastas.</em>",
+      "sub": "<strong>Control de gastos personales, sin fórmulas.</strong> Keru te muestra a dónde fue cada dólar de tu mes: por categoría y por lo que se repite sin que lo notes.",
+      "micro": "Sin tarjeta · Sin conexión bancaria · Tus datos no se venden"
+    },
+    "heroMock": {
+      "spend": "Gasto de abril",
+      "delta": "▲ 14.3% vs marzo",
+      "income": "Ingresos",
+      "savings": "Ahorro",
+      "daily": "Diario",
+      "spent": "GASTADO"
+    },
+    "categories": {
+      "food": "Comida",
+      "housing": "Vivienda",
+      "transport": "Transporte",
+      "subscriptions": "Suscripciones",
+      "income": "Ingreso"
+    },
+    "how": {
+      "eyebrow": "Cómo funciona",
+      "title": "Tres pasos, ningún archivo que importar.",
+      "sub": "Keru es registro manual a propósito: entradas de dos toques que te dejan ver el gasto en el momento en que ocurre.",
+      "s1": {
+        "title": "Registra",
+        "body": "Añade un gasto en dos toques, desde el navegador. Sin abrir una hoja de cálculo y sin arrastrar fórmulas hasta la última fila."
+      },
+      "s2": {
+        "title": "Etiqueta",
+        "body": "Asígnale una categoría. Cada etiqueta tiene color e icono, así el panel se lee sin leer números."
+      },
+      "s3": {
+        "title": "Entiende",
+        "body": "El desglose por categoría te responde a dónde fue el dinero antes de que tengas que buscarlo."
+      }
+    },
+    "features": {
+      "eyebrow": "Funciones",
+      "title": "Lo que el panel te dice.",
+      "sub": "Todo ordenado por la pregunta que estás intentando responder.",
+      "proBadge": "Pro",
+      "f1": {
+        "title": "Desglose por categoría",
+        "body": "El gráfico que abre el panel. Comida, vivienda, transporte: el reparto completo del mes de un vistazo."
+      },
+      "f2": {
+        "title": "Presupuestos por etiqueta",
+        "body": "Fija un techo por categoría y Keru te avisa cuando te acercas o lo pasas."
+      },
+      "f3": {
+        "title": "Análisis 50/30/20",
+        "body": "Keru reparte tu mes en necesidades, gustos y ahorro, automáticamente."
+      },
+      "f4": {
+        "title": "Gastos recurrentes",
+        "body": "Las suscripciones y pagos fijos, sumados. Lo que ya está comprometido antes de gastar nada."
+      },
+      "f5": {
+        "title": "Tendencias de 6 meses",
+        "body": "Ingresos contra gastos, mes a mes, para saber si algo es un patrón o un mal martes."
+      },
+      "f6": {
+        "title": "Transacciones ordenables",
+        "body": "Fecha, descripción, categoría, método, monto. Todo ordenable para llegar al detalle."
+      }
+    },
+    "gallery": {
+      "eyebrow": "Dentro de Keru",
+      "title": "Cómo se ve de verdad.",
+      "sub": "Las cinco vistas que usarás cada semana.",
+      "tabs": {
+        "budgets": "Categorías y presupuestos",
+        "trends": "Tendencias",
+        "transactions": "Transacciones",
+        "recurring": "Recurrentes",
+        "add": "Añadir gasto"
+      },
+      "panelTitles": {
+        "budgets": "Presupuestos de abril",
+        "trends": "Ingresos contra gastos · 6 meses",
+        "transactions": "Transacciones recientes",
+        "recurring": "Recurrentes",
+        "add": "Nuevo gasto"
+      },
+      "badges": { "over": "Excedido", "near": "Cerca" },
+      "next": "Próximo",
+      "table": {
+        "date": "Fecha",
+        "description": "Descripción",
+        "category": "Categoría",
+        "amount": "Monto"
+      },
+      "rows": {
+        "r1": "Mercado semanal",
+        "r2": "Nómina",
+        "r3": "Renta",
+        "r4": "Gasolina",
+        "r5": "Café"
+      },
+      "dates": {
+        "d1": "17 abr",
+        "d2": "15 abr",
+        "d3": "14 abr",
+        "d4": "12 abr",
+        "d5": "11 abr"
+      },
+      "recurringDates": {
+        "n1": "22 abr",
+        "n2": "19 abr",
+        "n3": "28 abr",
+        "n4": "25 abr",
+        "n5": "20 abr"
+      },
+      "months": ["Nov", "Dic", "Ene", "Feb", "Mar", "Abr"],
+      "internet": "Internet",
+      "recurringNames": ["Internet", "Netflix", "Membresía de gimnasio", "Plan telefónico", "Spotify"],
+      "form": {
+        "amount": "Monto",
+        "description": "Descripción",
+        "descriptionValue": "Comida con Ana",
+        "category": "Categoría",
+        "save": "Guardar gasto"
+      }
+    },
+    "faq": {
+      "eyebrow": "Preguntas",
+      "title": "Lo que la gente pregunta primero.",
+      "q1": "¿Es realmente gratis?",
+      "a1": "Gratis con límites. Puedes registrar gastos e ingresos sin límite y ver tu desglose por categoría sin pagar nada; el plan gratuito guarda 3 meses de historial. Pro desbloquea los presupuestos por etiqueta y el análisis 50/30/20.",
+      "q2": "¿Conecta con mi banco?",
+      "a2": "No. Keru es registro manual: tú añades cada gasto en dos toques. No conectamos con tu banco, así que no hay credenciales bancarias guardadas y no hay nada que hackear.",
+      "q3": "¿Qué pasa con mis datos?",
+      "a3": "Tus datos no se venden ni se comparten con nadie. Son tus gastos y existen para que tú los leas."
+    },
+    "closing": {
+      "title": "Empieza este mes. Sabrás a dónde fue en el siguiente.",
+      "sub": "Sin tarjeta. Sin conexión bancaria. Keru funciona en tu navegador."
+    }
   }
 }
