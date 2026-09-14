@@ -1,0 +1,15 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: keru-frontend
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - keru-network
+
+networks:
+  keru-network:
+    external: true
