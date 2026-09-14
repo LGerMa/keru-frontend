@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/use-auth";
 import { ApiClientError } from "@/lib/api";
 import { Input } from "@/components/ui/input";
+import { KMark } from "@/components/shared/k-mark";
 
 export default function LoginPage() {
   const t = useTranslations("Auth");
@@ -40,12 +41,7 @@ export default function LoginPage() {
     <div className="flex flex-col gap-8">
       {/* Brand mark */}
       <div className="flex flex-col items-center gap-3">
-        <div
-          className="flex items-center justify-center w-12 h-12 gradient-hero text-white text-xl font-extrabold shadow-colored"
-          style={{ borderRadius: "14px" }}
-        >
-          K
-        </div>
+        <KMark size={48} />
         <div className="text-center">
           <h1 className="text-2xl font-extrabold tracking-tight">
             keru<span className="text-primary">.</span>
