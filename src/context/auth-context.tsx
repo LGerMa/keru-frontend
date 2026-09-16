@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { api } from "@/lib/api";
 import {
   storeAuthResponse,
@@ -9,7 +10,17 @@ import {
   setStoredUser,
   isAuthenticated as checkIsAuthenticated,
 } from "@/lib/auth";
+import { createTag } from "@/hooks/use-tags";
 import type { User, AuthResponse } from "@/types/auth";
+
+const STARTER_TAGS: { key: "food" | "transport" | "housing" | "subscriptions" | "health" | "entertainment"; color: string }[] = [
+  { key: "food", color: "#EF4444" },
+  { key: "transport", color: "#F59E0B" },
+  { key: "housing", color: "#8B5CF6" },
+  { key: "subscriptions", color: "#3B82F6" },
+  { key: "health", color: "#10B981" },
+  { key: "entertainment", color: "#EC4899" },
+];
 
 interface AuthContextValue {
   user: User | null;
@@ -26,6 +37,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const tStarterTags = useTranslations("StarterTags");
 
   useEffect(() => {
     if (checkIsAuthenticated()) {
@@ -65,6 +77,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (name.trim()) {
       await api.patch("/v1/users/me", { name: name.trim() });
     }
+    await Promise.all(
+      STARTER_TAGS.map((tag) =>
+        createTag({ name: tStarterTags(tag.key), color: tag.color }).catch(() => null)
+      )
+    );
     await fetchAndStoreUser();
   }
 

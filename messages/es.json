@@ -1,4 +1,16 @@
 {
+  "Metadata": {
+    "title": "Keru — Registra y entiende tus gastos",
+    "description": "Un rastreador de finanzas personales mobile-first."
+  },
+  "StarterTags": {
+    "food": "Comida",
+    "transport": "Transporte",
+    "housing": "Vivienda",
+    "subscriptions": "Subscripciones",
+    "health": "Salud",
+    "entertainment": "Entretenimiento"
+  },
   "Common": {
     "appName": "keru",
     "tags": "Etiquetas",
@@ -158,7 +170,7 @@
     "statusScheduled": "Programado",
     "statusPaid": "Pagado",
     "statusOverdue": "Atrasado",
-    "noRecurring": "Aún no hay gastos recurrentes configurados.",
+    "noRecurring": "Aún no hay recurrentes configurados.",
     "recurringCountOne": "{count} recurrente",
     "recurringCountOther": "{count} recurrentes",
     "recurringFallback": "Recurrente",
