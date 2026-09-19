@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDate, parseDateOnly } from "@/lib/utils";
 import { TagBadge } from "@/components/app/tag-badge";
 import type { RecurringEntry } from "@/types/recurring";
 
@@ -14,7 +14,7 @@ type Status = "upcoming" | "active" | "paid" | "overdue";
 
 function getStatus(entry: RecurringEntry): Status {
   if (!entry.isActive) return "paid";
-  const next = new Date(entry.nextDate);
+  const next = parseDateOnly(entry.nextDate);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const diffDays = Math.round(
@@ -69,7 +69,7 @@ export function RecurringWatchlist({
   // Sorted by nextDate asc, expenses and income together
   const upcoming = entries
     .sort(
-      (a, b) => new Date(a.nextDate).getTime() - new Date(b.nextDate).getTime()
+      (a, b) => parseDateOnly(a.nextDate).getTime() - parseDateOnly(b.nextDate).getTime()
     )
     .slice(0, limit);
 
@@ -111,10 +111,7 @@ export function RecurringWatchlist({
           const primaryTag = entry.tags[0];
           const tagColor = primaryTag?.color ?? (isIncome ? "#22C55E" : "#6366f1");
           const tagName = primaryTag?.name ?? "other";
-          const nextFmt = new Intl.DateTimeFormat(locale, {
-            month: "short",
-            day: "numeric",
-          }).format(new Date(entry.nextDate));
+          const nextFmt = formatDate(entry.nextDate, { month: "short", day: "numeric", year: undefined }, locale);
 
           return (
             <div
