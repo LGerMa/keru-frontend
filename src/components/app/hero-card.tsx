@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { formatCurrency, formatMonth } from "@/lib/utils";
+import { formatCurrency, formatMonth, parseDateOnly } from "@/lib/utils";
 import type { DashboardSummary, MonthTrend } from "@/types/dashboard";
 
 interface HeroCardProps {
@@ -66,7 +66,7 @@ function Sparkline({ trends }: { trends: MonthTrend[] }) {
         const isMid = i === Math.floor((trends.length - 1) / 2);
         if (!isFirst && !isLast && !isMid) return null;
         const label = new Intl.DateTimeFormat(locale, { month: "short" }).format(
-          new Date(t.month + "-01")
+          parseDateOnly(t.month + "-01")
         );
         return (
           <text
