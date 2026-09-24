@@ -131,7 +131,7 @@ export function TopbarSearch() {
   }
 
   return (
-    <div className="relative flex-1 max-w-[380px]" ref={ref}>
+    <div className="relative flex-1 min-w-0 max-w-[380px]" ref={ref}>
       <Search
         size={14}
         className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
@@ -151,7 +151,7 @@ export function TopbarSearch() {
       />
 
       {open && trimmed && (
-        <div className="absolute left-0 top-full mt-2 w-[340px] max-h-96 overflow-y-auto rounded-xl border border-border bg-card shadow-card-md z-50">
+        <div className="absolute left-0 top-full mt-2 w-[min(340px,calc(100vw-2.5rem))] max-h-96 overflow-y-auto rounded-xl border border-border bg-card shadow-card-md z-50">
           {isLoading && !hasResults && (
             <p className="px-3 py-3 text-sm text-muted-foreground">{t("searchLoading")}</p>
           )}

@@ -283,7 +283,8 @@
     },
     "fallbackExpense": "{frequency} expense",
     "fallbackIncome": "{frequency} income",
-    "dayOfMonth": "Day of month (1–28)",
+    "dayOfMonth": "Day of month (1–31)",
+    "dayOfMonthClampHint": "In months without this day, it will fall on the last day of the month.",
     "dayOfWeek": "Day of week",
     "daysShort": {
       "sunday": "Sun",

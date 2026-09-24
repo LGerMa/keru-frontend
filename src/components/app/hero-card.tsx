@@ -99,8 +99,7 @@ export function HeroCard({ summary, trends, balanceDelta }: HeroCardProps) {
 
   return (
     <div
-      className="gradient-hero rounded-[28px] shadow-hero relative overflow-hidden mb-4"
-      style={{ padding: "28px 32px 26px" }}
+      className="gradient-hero rounded-[28px] shadow-hero relative overflow-hidden mb-4 p-6 lg:px-8 lg:pt-7 lg:pb-[26px]"
     >
       {/* Radial highlight glows */}
       <div
@@ -113,7 +112,7 @@ export function HeroCard({ summary, trends, balanceDelta }: HeroCardProps) {
 
       <div className="relative flex items-end justify-between gap-6">
         {/* Left — numbers */}
-        <div>
+        <div className="min-w-0 flex-1 lg:flex-none">
           <p
             className="text-xs font-semibold uppercase tracking-widest mb-2"
             style={{ color: "rgba(255,255,255,0.65)" }}
@@ -121,13 +120,13 @@ export function HeroCard({ summary, trends, balanceDelta }: HeroCardProps) {
             {t("heroBalance", { month: formatMonth(summary.month, locale) })}
           </p>
           <p
-            className="text-white font-extrabold leading-none"
-            style={{ fontSize: 52, letterSpacing: "-0.04em" }}
+            className="text-white font-extrabold leading-none text-[40px] lg:text-[52px]"
+            style={{ letterSpacing: "-0.04em" }}
           >
             {formatCurrency(summary.balance)}
           </p>
           <div className="flex gap-6 mt-5">
-            <div>
+            <div className="flex-1 lg:flex-none">
               <p className="text-xs font-medium mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
                 {t("heroIncome")}
               </p>
@@ -136,7 +135,7 @@ export function HeroCard({ summary, trends, balanceDelta }: HeroCardProps) {
               </p>
             </div>
             <div className="w-px" style={{ background: "rgba(255,255,255,0.2)" }} />
-            <div>
+            <div className="flex-1 lg:flex-none">
               <p className="text-xs font-medium mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
                 {t("heroExpenses")}
               </p>
@@ -144,8 +143,9 @@ export function HeroCard({ summary, trends, balanceDelta }: HeroCardProps) {
                 -{formatCurrency(summary.totalExpenses)}
               </p>
             </div>
-            <div className="w-px" style={{ background: "rgba(255,255,255,0.2)" }} />
-            <div>
+            {/* Savings rate — desktop only; mobile keeps just income vs expenses */}
+            <div className="hidden lg:block w-px" style={{ background: "rgba(255,255,255,0.2)" }} />
+            <div className="hidden lg:block">
               <p className="text-xs font-medium mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
                 {t("heroSavingsRate")}
               </p>
@@ -154,8 +154,8 @@ export function HeroCard({ summary, trends, balanceDelta }: HeroCardProps) {
           </div>
         </div>
 
-        {/* Right — delta badge + sparkline */}
-        <div className="flex-shrink-0 text-right">
+        {/* Right — delta badge + sparkline (desktop only — no room on mobile) */}
+        <div className="hidden lg:block flex-shrink-0 text-right">
           {hasDelta && (
             <div
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-white mb-2"

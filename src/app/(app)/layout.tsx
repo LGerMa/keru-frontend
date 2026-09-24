@@ -59,9 +59,9 @@ function MonthChip() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-2 px-3 py-2 rounded-[10px] bg-card border border-border text-sm font-medium hover:bg-muted transition-colors"
+        className="inline-flex flex-shrink-0 items-center gap-2 px-3 py-2 rounded-[10px] bg-card border border-border text-sm font-medium whitespace-nowrap hover:bg-muted transition-colors"
       >
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg className="hidden sm:block" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
         </svg>
         {formatMonth(month, locale)}
@@ -234,30 +234,32 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       {/* ── Main content area ─────────────────────────────── */}
       <div className="flex-1 lg:ml-60 flex flex-col min-h-screen">
 
-        {/* ── Desktop topbar ─────────────────────────────── */}
-        <header className="hidden lg:flex items-center gap-3 h-[60px] px-8 border-b bg-background sticky top-0 z-40 flex-shrink-0">
+        {/* ── Topbar — search, month, theme (all viewports) ── */}
+        <header className="border-b bg-background sticky top-0 z-40 flex-shrink-0">
+          <div className="flex items-center gap-2 h-14 px-5 max-w-md mx-auto w-full lg:max-w-none lg:mx-0 lg:gap-3 lg:h-[60px] lg:px-8">
 
-          {/* Search */}
-          <TopbarSearch />
+            {/* Search */}
+            <TopbarSearch />
 
-          <div className="flex-1" />
+            <div className="hidden lg:block flex-1" />
 
-          {/* Month chip */}
-          <MonthChip />
+            {/* Month chip */}
+            <MonthChip />
 
-          {/* Notifications */}
-          <button className="w-9 h-9 flex items-center justify-center rounded-[10px] bg-card border border-border hover:bg-muted transition-colors">
-            <Bell size={15} />
-          </button>
+            {/* Notifications — desktop only (no action yet, saves room on mobile) */}
+            <button className="hidden lg:flex w-9 h-9 items-center justify-center rounded-[10px] bg-card border border-border hover:bg-muted transition-colors">
+              <Bell size={15} />
+            </button>
 
-          {/* Dark mode toggle */}
-          <button
-            onClick={() => setDark((d) => !d)}
-            title={dark ? tNav("switchToLight") : tNav("switchToDark")}
-            className="w-9 h-9 flex items-center justify-center rounded-[10px] bg-card border border-border hover:bg-muted transition-colors"
-          >
-            {dark ? <Sun size={15} /> : <Moon size={15} />}
-          </button>
+            {/* Dark mode toggle */}
+            <button
+              onClick={() => setDark((d) => !d)}
+              title={dark ? tNav("switchToLight") : tNav("switchToDark")}
+              className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-[10px] bg-card border border-border hover:bg-muted transition-colors"
+            >
+              {dark ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+          </div>
         </header>
 
         {/* Page content */}

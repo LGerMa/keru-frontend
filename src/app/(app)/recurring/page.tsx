@@ -557,11 +557,14 @@ function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit, fr
                 id="rec-day-month"
                 type="number"
                 min="1"
-                max="28"
+                max="31"
                 value={form.dayOfMonth}
                 onChange={(e) => set({ dayOfMonth: e.target.value })}
                 className="w-full border rounded-xl px-4 py-3 text-sm bg-transparent focus:outline-none focus:ring-2 focus:ring-primary"
               />
+              {Number(form.dayOfMonth) >= 29 && (
+                <p className="text-xs text-muted-foreground mt-1">{t("dayOfMonthClampHint")}</p>
+              )}
             </div>
           )}
 
