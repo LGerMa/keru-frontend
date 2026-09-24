@@ -3,7 +3,6 @@
 import { useLocale, useTranslations } from "next-intl";
 import {
   formatCurrency,
-  parseDateOnly,
   formatDate,
   parseDateOnly,
 } from "@/lib/utils";
@@ -83,7 +82,7 @@ export function RecurringWatchlist({
   const locale = useLocale();
   const { goals } = useGoals();
   // Sorted by nextDate asc, expenses and income together
-  const upcoming = entries
+  const upcoming = [...entries]
     .sort(
       (a, b) =>
         parseDateOnly(a.nextDate).getTime() -

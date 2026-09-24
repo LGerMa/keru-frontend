@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useTags, createTag, updateTag, deleteTag } from "@/hooks/use-tags";
 import {
   useBudgets,
@@ -13,6 +13,8 @@ import {
   deleteBudget,
 } from "@/hooks/use-budgets";
 import { EmptyState } from "@/components/app/empty-state";
+import { useSelectedMonth } from "@/context/month-context";
+import { formatMonth } from "@/lib/utils";
 import type { Tag } from "@/types/tag";
 
 const PRESET_COLORS = [
@@ -40,7 +42,9 @@ export default function TagsPage() {
   const t = useTranslations("Tags");
   const { tags, isLoading, error, refetch } = useTags();
   const { budgets, refetch: refetchBudgets } = useBudgets();
-  const { statuses, refetch: refetchStatuses } = useBudgetStatus();
+  const locale = useLocale();
+  const { month } = useSelectedMonth();
+  const { statuses, refetch: refetchStatuses } = useBudgetStatus(month);
 
   // create dialog
   const [showCreate, setShowCreate] = useState(false);
@@ -163,7 +167,7 @@ export default function TagsPage() {
       {statuses.length > 0 && (
         <div className="bg-card rounded-2xl shadow-card-md border border-border p-4 mb-5">
           <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-muted-foreground">
-            {t("budgetsThisMonth")}
+            {t("budgetsForMonth", { month: formatMonth(month, locale) })}
           </p>
           <div className="flex flex-col gap-4">
             {statuses.map((status) => {

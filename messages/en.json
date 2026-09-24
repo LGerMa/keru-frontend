@@ -194,7 +194,7 @@
   "Tags": {
     "title": "Tags",
     "newTag": "New tag",
-    "budgetsThisMonth": "Budgets this month",
+    "budgetsForMonth": "Budgets · {month}",
     "emptyTitle": "No tags yet",
     "emptyDescription": "Create tags to categorize your expenses and income",
     "emptyAction": "Create your first tag",

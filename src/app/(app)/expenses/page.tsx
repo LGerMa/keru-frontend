@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Plus, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useExpenses } from "@/hooks/use-expenses";
-import { useIncome } from "@/hooks/use-income";
+import { usePaginatedExpenses } from "@/hooks/use-expenses";
+import { usePaginatedIncome } from "@/hooks/use-income";
 import { usePaymentSources } from "@/hooks/use-payment-sources";
 import { TransactionItem } from "@/components/app/transaction-item";
 import { EmptyState } from "@/components/app/empty-state";
@@ -40,15 +40,20 @@ export default function HistoryPage() {
   const { paymentSources } = usePaymentSources();
   const activeSource = paymentSources.find((s) => s.id === paymentSourceId);
 
-  const { expenses, meta: expMeta, isLoading: expLoading, error: expError } =
-    useExpenses({ month, tags: tagFilter || undefined, paymentSourceId: paymentSourceId || undefined, type: typeFilter || undefined });
-  const { income, meta: incMeta, isLoading: incLoading, error: incError } =
-    useIncome({ month });
+  // usePaginatedExpenses/usePaginatedIncome accumulate pages as loadMore is
+  // called (for infinite scroll) and reset automatically when their own
+  // filter args change — no page-tracking or accumulation needed here.
+  const { expenses, meta: expMeta, isLoading: expLoading, isLoadingMore: expLoadingMore, error: expError, loadMore: loadMoreExpenses } =
+    usePaginatedExpenses({ month, tags: tagFilter || undefined, paymentSourceId: paymentSourceId || undefined, type: typeFilter || undefined });
+  const { income, meta: incMeta, isLoading: incLoading, isLoadingMore: incLoadingMore, error: incError, loadMore: loadMoreIncome } =
+    usePaginatedIncome({ month });
 
   const isLoading = tab === "expenses" ? expLoading : incLoading;
+  const isLoadingMore = tab === "expenses" ? expLoadingMore : incLoadingMore;
   const error     = tab === "expenses" ? expError   : incError;
   const items     = tab === "expenses" ? expenses   : income;
   const meta      = tab === "expenses" ? expMeta    : incMeta;
+  const hasNextPage = meta?.hasNextPage ?? false;
   const addHref   = tab === "expenses" ? "/expenses/new" : "/income/new";
   const addLabel  = tab === "expenses" ? t("addExpense")   : t("addIncome");
   const emptyTitle = tab === "expenses" ? t("emptyTitleExpenses") : t("emptyTitleIncome");
@@ -57,6 +62,24 @@ export default function HistoryPage() {
     tab === "expenses"
       ? (count === 1 ? t("expenseCountOne", { count }) : t("expenseCountOther", { count }))
       : (count === 1 ? t("entryCountOne", { count }) : t("entryCountOther", { count }));
+
+  // Sentinel element that triggers the next page load when it scrolls into view.
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isLoading && !isLoadingMore) {
+          if (tab === "expenses") loadMoreExpenses();
+          else loadMoreIncome();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [tab, hasNextPage, isLoading, isLoadingMore, loadMoreExpenses, loadMoreIncome]);
 
   const isIncome = tab === "income";
 
@@ -231,6 +254,13 @@ export default function HistoryPage() {
                   <TransactionItem key={e.id} transaction={{ kind: "income", ...e }} />
                 ))}
           </div>
+          {isLoadingMore && (
+            <div className="flex justify-center py-4">
+              <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            </div>
+          )}
+          {/* Sentinel — entering the viewport triggers the next page fetch */}
+          <div ref={sentinelRef} className="h-1" />
           {meta && (
             <p className="text-xs text-muted-foreground text-center mt-4">{countLabel}</p>
           )}

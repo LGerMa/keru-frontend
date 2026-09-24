@@ -194,7 +194,7 @@
   "Tags": {
     "title": "Etiquetas",
     "newTag": "Nueva etiqueta",
-    "budgetsThisMonth": "Presupuestos este mes",
+    "budgetsForMonth": "Presupuestos · {month}",
     "emptyTitle": "Aún no hay etiquetas",
     "emptyDescription": "Crea etiquetas para categorizar tus gastos e ingresos",
     "emptyAction": "Crea tu primera etiqueta",
