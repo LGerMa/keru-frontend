@@ -19,6 +19,7 @@ export interface Expense {
   source: "web" | "whatsapp";
   receiptUrl: string | null;
   tags: ExpenseTag[];
+  goalId: string | null;
   createdAt: string;
 }
 
@@ -32,6 +33,7 @@ export interface CreateExpenseDto {
   paymentSourceId?: string | null;
   /** Omit to default to "variable". */
   type?: ExpenseType;
+  goalId?: string;
 }
 
 export interface UpdateExpenseDto {
@@ -44,4 +46,6 @@ export interface UpdateExpenseDto {
   /** Send `null` explicitly to clear an existing attribution. Omit to leave unchanged. */
   paymentSourceId?: string | null;
   type?: ExpenseType;
+  /** Send `null` explicitly to clear an existing goal link. Omit to leave unchanged. */
+  goalId?: string | null;
 }

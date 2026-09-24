@@ -28,6 +28,7 @@ export interface RecurringEntry {
   isActive: boolean;
   tags: RecurringTag[];
   paymentSource: RecurringPaymentSource | null;
+  goalId: string | null;
   createdAt: string;
 }
 
@@ -44,6 +45,8 @@ export interface CreateRecurringDto {
   tagIds?: string[];
   /** UUID of a payment source; expense entries only. */
   paymentSourceId?: string | null;
+  /** UUID of a goal; expense entries only. */
+  goalId?: string;
 }
 
 export interface UpdateRecurringDto {
@@ -59,4 +62,6 @@ export interface UpdateRecurringDto {
   tagIds?: string[];
   /** Send `null` explicitly to clear an existing source. Omit to leave unchanged. */
   paymentSourceId?: string | null;
+  /** Send `null` explicitly to clear an existing goal link. Omit to leave unchanged. */
+  goalId?: string | null;
 }

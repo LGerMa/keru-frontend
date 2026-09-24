@@ -27,7 +27,7 @@ export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOpt
 // which then renders as the previous day in any timezone behind UTC.
 // Parse them as a local calendar date instead so the displayed day always
 // matches the stored date, regardless of the viewer's timezone.
-function parseDateOnly(date: string | Date): Date {
+export function parseDateOnly(date: string | Date): Date {
   if (date instanceof Date) return date
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date)
   if (match) {

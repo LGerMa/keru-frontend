@@ -1,9 +1,11 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, parseDateOnly } from "@/lib/utils";
 import { TagBadge } from "@/components/app/tag-badge";
+import { useGoals } from "@/hooks/use-goals";
 import type { RecurringEntry } from "@/types/recurring";
+import type { GoalWithProgress } from "@/types/goal";
 
 interface RecurringWatchlistProps {
   entries: RecurringEntry[];
@@ -14,7 +16,7 @@ type Status = "upcoming" | "active" | "paid" | "overdue";
 
 function getStatus(entry: RecurringEntry): Status {
   if (!entry.isActive) return "paid";
-  const next = new Date(entry.nextDate);
+  const next = parseDateOnly(entry.nextDate);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const diffDays = Math.round(
@@ -25,7 +27,7 @@ function getStatus(entry: RecurringEntry): Status {
   return "active";
 }
 
-function StatusBadge({ status, t }: { status: Status; t: ReturnType<typeof useTranslations> }) {
+function StatusBadge({ status, isGoalComplete, t }: { status: Status; isGoalComplete?: boolean; t: ReturnType<typeof useTranslations> }) {
   const styles: Record<Status, { bg: string; fg: string; label: string }> = {
     upcoming: {
       bg: "rgba(99, 102, 241, 0.12)",
@@ -40,7 +42,7 @@ function StatusBadge({ status, t }: { status: Status; t: ReturnType<typeof useTr
     paid: {
       bg: "rgba(34, 197, 94, 0.12)",
       fg: "#22C55E",
-      label: t("statusPaid"),
+      label: isGoalComplete ? t("statusPaidGoalComplete") : t("statusPaid"),
     },
     overdue: {
       bg: "rgba(239, 68, 68, 0.12)",
@@ -66,6 +68,7 @@ export function RecurringWatchlist({
   const t = useTranslations("Dashboard");
   const tRecurring = useTranslations("Recurring");
   const locale = useLocale();
+  const { goals } = useGoals();
   // Show expense entries only, sorted by nextDate asc
   const expenses = entries
     .filter((e) => e.entryType === "expense")
@@ -103,13 +106,17 @@ export function RecurringWatchlist({
       <div>
         {expenses.map((entry) => {
           const status = getStatus(entry);
+          const linkedGoal = entry.goalId
+            ? goals.find((g: GoalWithProgress) => g.id === entry.goalId)
+            : undefined;
+          const isGoalComplete = !entry.isActive && linkedGoal?.status === "completed";
           const primaryTag = entry.tags[0];
           const tagColor = primaryTag?.color ?? "#6366f1";
           const tagName = primaryTag?.name ?? "other";
           const nextFmt = new Intl.DateTimeFormat(locale, {
             month: "short",
             day: "numeric",
-          }).format(new Date(entry.nextDate));
+          }).format(parseDateOnly(entry.nextDate));
 
           return (
             <div
@@ -125,7 +132,7 @@ export function RecurringWatchlist({
                   {tRecurring(`frequency.${entry.frequency}`)} · {t("nextDate", { date: nextFmt })}
                 </p>
               </div>
-              <StatusBadge status={status} t={t} />
+              <StatusBadge status={status} isGoalComplete={isGoalComplete} t={t} />
               <p className="text-sm font-bold tabular-nums min-w-[52px] text-right">
                 {formatCurrency(entry.amount)}
               </p>
