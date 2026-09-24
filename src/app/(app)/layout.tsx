@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { MonthProvider, useSelectedMonth } from "@/context/month-context";
 import {
   Home, List, Plus, Tag, User,
-  TrendingUp, Repeat2,
+  TrendingUp, Repeat2, Target,
   Bell, Sun, Moon, ChevronDown, Settings,
 } from "lucide-react";
 import Link from "next/link";
@@ -15,11 +15,12 @@ import { cn, formatMonth } from "@/lib/utils";
 import { TopbarSearch } from "@/components/app/topbar-search";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", icon: Home,    labelKey: "dashboard" as const },
-  { href: "/expenses",  icon: List,    labelKey: "transactions" as const },
-  { href: "/recurring", icon: Repeat2, labelKey: "recurring" as const },
-  { href: "/tags",      icon: Tag,     labelKey: "tags" as const },
-  { href: "/profile",   icon: User,    labelKey: "profile" as const },
+  { href: "/dashboard", icon: Home,     labelKey: "dashboard"    as const, mobile: true },
+  { href: "/expenses",  icon: List,     labelKey: "transactions" as const, mobile: true },
+  { href: "/goals",     icon: Target,   labelKey: "goals"        as const, mobile: true },
+  { href: "/recurring", icon: Repeat2,  labelKey: "recurring"    as const, mobile: false },
+  { href: "/tags",      icon: Tag,      labelKey: "tags"         as const, mobile: false },
+  { href: "/profile",   icon: User,     labelKey: "profile"      as const, mobile: true },
 ];
 
 // ── Last 12 months, most recent first (as "YYYY-MM") ───────────
@@ -132,6 +133,8 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
   const isNavActive = (href: string) =>
     pathname === href ||
     (pathname.startsWith(href + "/") && !pathname.endsWith("/new"));
+
+  const mobileNavItems = NAV_ITEMS.filter((item) => item.mobile);
 
   const displayName =
     [user?.profile?.name, user?.profile?.lastname].filter(Boolean).join(" ") ||
@@ -264,7 +267,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
 
         {/* ── Bottom nav — mobile only ───────────────────── */}
         <nav className="lg:hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-card border-t flex items-center justify-around h-16 px-2 z-50">
-          {NAV_ITEMS.slice(0, 2).map(({ href, icon: Icon, labelKey }) => (
+          {mobileNavItems.slice(0, 2).map(({ href, icon: Icon, labelKey }) => (
             <Link
               key={href}
               href={href}
@@ -324,7 +327,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
             </button>
           </div>
 
-          {NAV_ITEMS.slice(2).map(({ href, icon: Icon, labelKey }) => (
+          {mobileNavItems.slice(2).map(({ href, icon: Icon, labelKey }) => (
             <Link
               key={href}
               href={href}

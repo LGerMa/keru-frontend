@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useLocale, useTranslations } from "next-intl";
 import { getExpense, updateExpense, deleteExpense } from "@/hooks/use-expenses";
 import { TagSelector } from "@/components/app/tag-selector";
+import { GoalSelect } from "@/components/app/goal-select";
 import { PaymentMethodSelect } from "@/components/app/payment-method-select";
 import { PaymentSourceSelect } from "@/components/app/payment-source-select";
 import { ExpenseTypeSelect } from "@/components/app/expense-type-select";
@@ -36,6 +37,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
   const [paymentSourceId, setPaymentSourceId] = useState("");
   const [type, setType] = useState<ExpenseType>("variable");
   const [tagIds, setTagIds] = useState<string[]>([]);
+  const [goalId, setGoalId] = useState("");
 
   useEffect(() => {
     getExpense(id)
@@ -48,6 +50,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
         setPaymentSourceId(e.paymentSource?.id ?? "");
         setType(e.type);
         setTagIds(e.tags.map((t) => t.id));
+        setGoalId(e.goalId ?? "");
       })
       .catch(() => toast.error(t("loadFailed")))
       .finally(() => setIsLoading(false));
@@ -70,6 +73,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
         description: description.trim() || undefined,
         tagIds,
         paymentSourceId: paymentSourceId || null,
+        goalId: goalId || null,
         type,
       };
       const updated = await updateExpense(id, dto);
@@ -223,6 +227,7 @@ export default function ExpenseDetailPage({ params }: { params: Promise<{ id: st
           />
           <ExpenseTypeSelect value={type} onChange={setType} />
           <TagSelector selected={tagIds} onChange={setTagIds} />
+          <GoalSelect value={goalId} onChange={setGoalId} />
 
           <div className="flex gap-3">
             <button

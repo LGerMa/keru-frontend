@@ -8,7 +8,7 @@ import { useAuthContext } from "@/context/auth-context";
 import { api } from "@/lib/api";
 import { setLocale } from "@/app/actions/set-locale";
 import type { Locale } from "@/i18n/request";
-import { LogOut, Pencil, X, Check, CreditCard, ChevronRight } from "lucide-react";
+import { LogOut, Pencil, X, Check, CreditCard, ChevronRight, Tag } from "lucide-react";
 
 const PROFILE_MONTH_YEAR_FORMAT: Intl.DateTimeFormatOptions = { month: "long", year: "numeric" };
 
@@ -188,6 +188,14 @@ export default function ProfilePage() {
               </button>
             </div>
           </div>
+          <Link
+            href="/tags"
+            className="flex items-center gap-3 px-4 py-3.5 border-b border-border hover:bg-muted/40 transition-colors"
+          >
+            <Tag size={16} className="text-muted-foreground shrink-0" />
+            <span className="flex-1 text-sm font-medium">{t("tags")}</span>
+            <ChevronRight size={16} className="text-muted-foreground shrink-0" />
+          </Link>
           <Link
             href="/payment-sources"
             className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/40 transition-colors"
