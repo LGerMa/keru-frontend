@@ -12,15 +12,18 @@ import {
   pauseRecurring,
   resumeRecurring,
 } from "@/hooks/use-recurring";
+import { useGoals } from "@/hooks/use-goals";
 import { TagSelector } from "@/components/app/tag-selector";
 import { PaymentMethodSelect } from "@/components/app/payment-method-select";
 import { PaymentSourceSelect } from "@/components/app/payment-source-select";
 import { IncomeTypeSelect } from "@/components/app/income-type-select";
+import { GoalSelect } from "@/components/app/goal-select";
 import { EmptyState } from "@/components/app/empty-state";
 import { formatCurrency } from "@/lib/utils";
 import type { RecurringEntry, RecurringFrequency, RecurringEntryType, CreateRecurringDto } from "@/types/recurring";
 import type { PaymentMethod } from "@/lib/constants";
 import type { IncomeType } from "@/types/income";
+import type { GoalWithProgress } from "@/types/goal";
 
 const FREQUENCY_VALUES: RecurringFrequency[] = ["weekly", "biweekly", "monthly"];
 
@@ -40,6 +43,7 @@ interface FormState {
   paymentSourceId: string;
   incomeType: IncomeType | "";
   tagIds: string[];
+  goalId: string;
 }
 
 const DEFAULT_FORM: FormState = {
@@ -54,6 +58,7 @@ const DEFAULT_FORM: FormState = {
   paymentSourceId: "",
   incomeType: "",
   tagIds: [],
+  goalId: "",
 };
 
 function nextDateLabel(date: string, locale: string): string {
@@ -65,6 +70,7 @@ export default function RecurringPage() {
   const t = useTranslations("Recurring");
   const locale = useLocale();
   const { entries, isLoading, error, refetch } = useRecurring();
+  const { goals } = useGoals();
 
   const FREQUENCIES: { value: RecurringFrequency; label: string }[] = FREQUENCY_VALUES.map((v) => ({
     value: v,
@@ -102,6 +108,7 @@ export default function RecurringPage() {
       paymentSourceId: entry.paymentSource?.id ?? "",
       incomeType: (entry.incomeType ?? "") as IncomeType | "",
       tagIds: entry.tags.map((t) => t.id),
+      goalId: entry.goalId ?? "",
     });
     setShowForm(true);
   }
@@ -137,6 +144,15 @@ export default function RecurringPage() {
       // On edit, send null explicitly to clear an existing source.
       if (form.paymentSourceId) dto.paymentSourceId = form.paymentSourceId;
       else if (editingEntry) dto.paymentSourceId = null;
+
+      if (form.goalId) dto.goalId = form.goalId;
+      // `CreateRecurringDto.goalId` is typed `string | undefined` (no `null`),
+      // unlike `paymentSourceId` above. `dto` is sent through `updateRecurring`
+      // (typed `UpdateRecurringDto`, which does allow `null`) when editing, so
+      // this is a safe, deliberate cast to reach parity with the paymentSourceId
+      // clear-on-edit pattern without editing types/recurring.ts (out of scope
+      // for this task).
+      else if (editingEntry) (dto as { goalId?: string | null }).goalId = null;
     }
 
     if (form.frequency === "monthly" && form.dayOfMonth) {
@@ -257,6 +273,7 @@ export default function RecurringPage() {
                     frequencyLabel={frequencyLabel}
                     locale={locale}
                     t={t}
+                    goals={goals}
                   />
                 ))}
               </div>
@@ -282,6 +299,7 @@ export default function RecurringPage() {
                     frequencyLabel={frequencyLabel}
                     locale={locale}
                     t={t}
+                    goals={goals}
                   />
                 ))}
               </div>
@@ -318,9 +336,10 @@ interface RecurringItemProps {
   readonly frequencyLabel: (f: RecurringFrequency) => string;
   readonly locale: string;
   readonly t: ReturnType<typeof useTranslations>;
+  readonly goals: GoalWithProgress[];
 }
 
-function RecurringItem({ entry, isLast, isDeleting, isToggling, onEdit, onDelete, onToggle, frequencyLabel, locale, t }: RecurringItemProps) {
+function RecurringItem({ entry, isLast, isDeleting, isToggling, onEdit, onDelete, onToggle, frequencyLabel, locale, t, goals }: RecurringItemProps) {
   const tagColor = entry.tags[0]?.color;
   const isIncome = entry.entryType === "income";
 
@@ -340,11 +359,22 @@ function RecurringItem({ entry, isLast, isDeleting, isToggling, onEdit, onDelete
                 ? t("fallbackIncome", { frequency: frequencyLabel(entry.frequency).toLowerCase() })
                 : t("fallbackExpense", { frequency: frequencyLabel(entry.frequency).toLowerCase() }))}
           </span>
-          {!entry.isActive && (
-            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">
-              {t("paused")}
-            </span>
-          )}
+          {!entry.isActive && (() => {
+            const linkedGoal = entry.goalId ? goals.find((g) => g.id === entry.goalId) : undefined;
+            const isGoalComplete = linkedGoal?.status === "completed";
+            return (
+              <span
+                className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                style={
+                  isGoalComplete
+                    ? { backgroundColor: "rgba(34, 197, 94, 0.12)", color: "#22C55E" }
+                    : { backgroundColor: "var(--muted)", color: "var(--muted-foreground)" }
+                }
+              >
+                {isGoalComplete ? t("pausedGoalComplete") : t("paused")}
+              </span>
+            );
+          })()}
         </div>
         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
           <span className="text-xs text-muted-foreground">{frequencyLabel(entry.frequency)}</span>
@@ -444,7 +474,11 @@ function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit, fr
                 <button
                   key={entryType}
                   type="button"
-                  onClick={() => set({ entryType })}
+                  onClick={() =>
+                    entryType === "income"
+                      ? set({ entryType: "income", goalId: "" })
+                      : set({ entryType: "expense" })
+                  }
                   className="flex-1 py-2 rounded-lg text-xs font-semibold transition-colors"
                   style={
                     form.entryType !== entryType
@@ -592,6 +626,11 @@ function FormSheet({ form, onChange, onSubmit, onClose, isSubmitting, isEdit, fr
 
           {/* Tags */}
           <TagSelector selected={form.tagIds} onChange={(ids) => set({ tagIds: ids })} />
+
+          {/* Goal (expense only) */}
+          {form.entryType === "expense" && (
+            <GoalSelect value={form.goalId} onChange={(goalId) => set({ goalId })} />
+          )}
 
           {/* Actions */}
           <div className="flex gap-3 mt-1">

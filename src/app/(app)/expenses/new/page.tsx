@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { createExpense } from "@/hooks/use-expenses";
 import { TagSelector } from "@/components/app/tag-selector";
+import { GoalSelect } from "@/components/app/goal-select";
 import { PaymentMethodSelect } from "@/components/app/payment-method-select";
 import { PaymentSourceSelect } from "@/components/app/payment-source-select";
 import { ExpenseTypeSelect } from "@/components/app/expense-type-select";
@@ -23,6 +24,7 @@ export default function NewExpensePage() {
   const [paymentSourceId, setPaymentSourceId] = useState("");
   const [type, setType] = useState<ExpenseType>("variable");
   const [tagIds, setTagIds] = useState<string[]>([]);
+  const [goalId, setGoalId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -46,6 +48,7 @@ export default function NewExpensePage() {
         description: description.trim() || undefined,
         tagIds: tagIds.length > 0 ? tagIds : undefined,
         paymentSourceId: paymentSourceId || undefined,
+        goalId: goalId || undefined,
         type,
       });
       toast.success(t("expenseAdded"));
@@ -124,6 +127,9 @@ export default function NewExpensePage() {
 
         {/* Tags */}
         <TagSelector selected={tagIds} onChange={setTagIds} />
+
+        {/* Goal */}
+        <GoalSelect value={goalId} onChange={setGoalId} />
 
         <button
           type="submit"

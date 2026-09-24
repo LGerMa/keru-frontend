@@ -8,6 +8,7 @@ import { useSelectedMonth } from "@/context/month-context";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { useBudgetStatus } from "@/hooks/use-budgets";
 import { useBudgetRule } from "@/hooks/use-budget-rule";
+import { useGoals } from "@/hooks/use-goals";
 import { useRecurring } from "@/hooks/use-recurring";
 import { useInsights } from "@/hooks/use-insights";
 import { useBalanceDelta } from "@/hooks/use-balance-delta";
@@ -18,6 +19,7 @@ import { CategoryDonut } from "@/components/app/category-donut";
 import { BudgetOverview } from "@/components/app/budget-overview";
 import { BudgetRuleCard } from "@/components/app/budget-rule-card";
 import { BudgetRuleTransactionsModal } from "@/components/app/budget-rule-transactions-modal";
+import { GoalsStrip } from "@/components/app/goals-strip";
 import { TrendsChart } from "@/components/app/trends-chart";
 import { TransactionsTable } from "@/components/app/transactions-table";
 import { RecurringWatchlist } from "@/components/app/recurring-watchlist";
@@ -117,6 +119,7 @@ export default function DashboardPage() {
 
   const { statuses: budgetStatuses } = useBudgetStatus(month);
   const { rule: budgetRule, isLoading: ruleLoading } = useBudgetRule(month);
+  const { goals } = useGoals();
   const { entries: recurringEntries } = useRecurring();
   const { paymentSources } = usePaymentSources();
 
@@ -220,6 +223,20 @@ export default function DashboardPage() {
                   {t("budgetsSub", { month: summary ? formatMonth(summary.month, locale) : "" })}
                 </p>
                 <BudgetOverview statuses={budgetStatuses} />
+              </Card>
+            )}
+            {goals.filter((g) => g.status !== "abandoned").length > 0 && (
+              <Card>
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm font-bold">{t("goals")}</p>
+                  <Link href="/goals" className="text-xs font-semibold text-primary">
+                    {t("goalsManage")}
+                  </Link>
+                </div>
+                <p className="text-xs text-muted-foreground mb-4">
+                  {t("goalsSub")}
+                </p>
+                <GoalsStrip goals={goals} />
               </Card>
             )}
             {!ruleLoading && budgetRule && (
