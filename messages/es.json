@@ -1,4 +1,16 @@
 {
+  "Metadata": {
+    "title": "Keru — Registra y entiende tus gastos",
+    "description": "Un rastreador de finanzas personales mobile-first."
+  },
+  "StarterTags": {
+    "food": "Comida",
+    "transport": "Transporte",
+    "housing": "Vivienda",
+    "subscriptions": "Subscripciones",
+    "health": "Salud",
+    "entertainment": "Entretenimiento"
+  },
   "Common": {
     "appName": "keru",
     "tags": "Etiquetas",
@@ -166,7 +178,7 @@
     "statusPaid": "Pagado",
     "statusPaidGoalComplete": "Meta completada",
     "statusOverdue": "Atrasado",
-    "noRecurring": "Aún no hay gastos recurrentes configurados.",
+    "noRecurring": "Aún no hay recurrentes configurados.",
     "recurringCountOne": "{count} recurrente",
     "recurringCountOther": "{count} recurrentes",
     "recurringFallback": "Recurrente",
@@ -182,7 +194,7 @@
   "Tags": {
     "title": "Etiquetas",
     "newTag": "Nueva etiqueta",
-    "budgetsThisMonth": "Presupuestos este mes",
+    "budgetsForMonth": "Presupuestos · {month}",
     "emptyTitle": "Aún no hay etiquetas",
     "emptyDescription": "Crea etiquetas para categorizar tus gastos e ingresos",
     "emptyAction": "Crea tu primera etiqueta",
@@ -209,6 +221,34 @@
     "updateFailed": "No se pudo actualizar la etiqueta",
     "tagDeleted": "Etiqueta eliminada",
     "deleteFailed": "No se pudo eliminar la etiqueta"
+  },
+  "PaymentSources": {
+    "title": "Fuentes de pago",
+    "newSource": "Nueva fuente",
+    "description": "Ponle un alias a tus tarjetas y cuentas (ej. <b>visa 8943</b>, <b>bac roja</b>) para atribuir y filtrar gastos por ellas.",
+    "emptyTitle": "Aún no hay fuentes de pago",
+    "emptyDescription": "Agrega una tarjeta o cuenta para empezar a atribuir gastos",
+    "emptyAction": "Agrega tu primera fuente",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "newSourceDialogTitle": "Nueva fuente de pago",
+    "editSourceDialogTitle": "Editar fuente de pago",
+    "create": "Crear",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "cancel": "Cancelar",
+    "alias": "Alias",
+    "aliasPlaceholder": "ej. visa 8943",
+    "paymentMethodOptional": "Método de pago (opcional)",
+    "color": "Color",
+    "preview": "Vista previa",
+    "aliasRequired": "El alias es requerido",
+    "sourceCreated": "Fuente de pago creada",
+    "createFailed": "No se pudo crear la fuente de pago",
+    "sourceUpdated": "Fuente de pago actualizada",
+    "updateFailed": "No se pudo actualizar la fuente de pago",
+    "sourceDeleted": "Fuente de pago eliminada",
+    "deleteFailed": "No se pudo eliminar la fuente de pago"
   },
   "Recurring": {
     "title": "Recurrentes",
@@ -554,7 +594,13 @@
       },
       "months": ["Nov", "Dic", "Ene", "Feb", "Mar", "Abr"],
       "internet": "Internet",
-      "recurringNames": ["Internet", "Netflix", "Membresía de gimnasio", "Plan telefónico", "Spotify"],
+      "recurringNames": [
+        "Internet",
+        "Netflix",
+        "Membresía de gimnasio",
+        "Plan telefónico",
+        "Spotify"
+      ],
       "form": {
         "amount": "Monto",
         "description": "Descripción",

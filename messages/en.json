@@ -1,4 +1,16 @@
 {
+  "Metadata": {
+    "title": "Keru — Keep Expenses Recorded & Understood",
+    "description": "A mobile-first personal finance tracker."
+  },
+  "StarterTags": {
+    "food": "Food",
+    "transport": "Transport",
+    "housing": "Housing",
+    "subscriptions": "Subscriptions",
+    "health": "Health",
+    "entertainment": "Entertainment"
+  },
   "Common": {
     "appName": "keru",
     "tags": "Tags",
@@ -166,7 +178,7 @@
     "statusPaid": "Paid",
     "statusPaidGoalComplete": "Goal complete",
     "statusOverdue": "Overdue",
-    "noRecurring": "No recurring expenses set up yet.",
+    "noRecurring": "No recurring entries set up yet.",
     "recurringCountOne": "{count} recurring",
     "recurringCountOther": "{count} recurring",
     "recurringFallback": "Recurring",
@@ -182,7 +194,7 @@
   "Tags": {
     "title": "Tags",
     "newTag": "New tag",
-    "budgetsThisMonth": "Budgets this month",
+    "budgetsForMonth": "Budgets · {month}",
     "emptyTitle": "No tags yet",
     "emptyDescription": "Create tags to categorize your expenses and income",
     "emptyAction": "Create your first tag",
@@ -209,6 +221,34 @@
     "updateFailed": "Could not update tag",
     "tagDeleted": "Tag deleted",
     "deleteFailed": "Could not delete tag"
+  },
+  "PaymentSources": {
+    "title": "Payment sources",
+    "newSource": "New source",
+    "description": "Nickname your cards and accounts (e.g. <b>visa 8943</b>, <b>bac red</b>) to attribute and filter expenses by them.",
+    "emptyTitle": "No payment sources yet",
+    "emptyDescription": "Add a card or account to start attributing expenses",
+    "emptyAction": "Add your first source",
+    "edit": "Edit",
+    "delete": "Delete",
+    "newSourceDialogTitle": "New payment source",
+    "editSourceDialogTitle": "Edit payment source",
+    "create": "Create",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "alias": "Alias",
+    "aliasPlaceholder": "e.g. visa 8943",
+    "paymentMethodOptional": "Payment method (optional)",
+    "color": "Color",
+    "preview": "Preview",
+    "aliasRequired": "Alias is required",
+    "sourceCreated": "Payment source created",
+    "createFailed": "Could not create payment source",
+    "sourceUpdated": "Payment source updated",
+    "updateFailed": "Could not update payment source",
+    "sourceDeleted": "Payment source deleted",
+    "deleteFailed": "Could not delete payment source"
   },
   "Recurring": {
     "title": "Recurring",

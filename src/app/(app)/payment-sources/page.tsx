@@ -37,11 +37,12 @@ const DEFAULT_FORM: SourceFormState = {
 };
 
 export default function PaymentSourcesPage() {
-  const t = useTranslations("Common");
+  const t = useTranslations("PaymentSources");
+  const tCommon = useTranslations("Common");
   const { paymentSources, isLoading, error, refetch } = usePaymentSources();
 
   function methodLabel(method: PaymentMethod | null): string {
-    return PAYMENT_METHODS.find((m) => m.value === method) ? t(`paymentMethods.${method}`) : t("noMethod");
+    return PAYMENT_METHODS.find((m) => m.value === method) ? tCommon(`paymentMethods.${method}`) : tCommon("noMethod");
   }
 
   const [showCreate, setShowCreate] = useState(false);
@@ -56,7 +57,7 @@ export default function PaymentSourcesPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!createForm.alias.trim()) { toast.error("Alias is required"); return; }
+    if (!createForm.alias.trim()) { toast.error(t("aliasRequired")); return; }
     setIsCreating(true);
     try {
       await createPaymentSource({
@@ -67,9 +68,9 @@ export default function PaymentSourcesPage() {
       refetch();
       setShowCreate(false);
       setCreateForm(DEFAULT_FORM);
-      toast.success("Payment source created");
+      toast.success(t("sourceCreated"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not create payment source");
+      toast.error(err instanceof Error ? err.message : t("createFailed"));
     } finally {
       setIsCreating(false);
     }
@@ -87,7 +88,7 @@ export default function PaymentSourcesPage() {
   async function handleEdit(e: React.FormEvent) {
     e.preventDefault();
     if (!editing) return;
-    if (!editForm.alias.trim()) { toast.error("Alias is required"); return; }
+    if (!editForm.alias.trim()) { toast.error(t("aliasRequired")); return; }
     setIsSaving(true);
     try {
       await updatePaymentSource(editing.id, {
@@ -97,9 +98,9 @@ export default function PaymentSourcesPage() {
       });
       refetch();
       setEditing(null);
-      toast.success("Payment source updated");
+      toast.success(t("sourceUpdated"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not update payment source");
+      toast.error(err instanceof Error ? err.message : t("updateFailed"));
     } finally {
       setIsSaving(false);
     }
@@ -109,10 +110,10 @@ export default function PaymentSourcesPage() {
     setDeletingId(id);
     try {
       await deletePaymentSource(id);
-      toast.success("Payment source deleted");
+      toast.success(t("sourceDeleted"));
       refetch();
     } catch (err) {
-      toast.error((err as Error).message ?? "Could not delete payment source");
+      toast.error((err as Error).message ?? t("deleteFailed"));
     } finally {
       setDeletingId(null);
     }
@@ -125,20 +126,19 @@ export default function PaymentSourcesPage() {
           <Link href="/profile" className="text-muted-foreground">
             <ChevronLeft size={20} />
           </Link>
-          <h1 className="text-lg font-bold tracking-tight">Payment sources</h1>
+          <h1 className="text-lg font-bold tracking-tight">{t("title")}</h1>
         </div>
         <button
           onClick={() => { setShowCreate(true); setCreateForm(DEFAULT_FORM); }}
           className="flex items-center gap-1 text-xs text-primary font-semibold"
         >
           <Plus size={14} />
-          New source
+          {t("newSource")}
         </button>
       </div>
 
       <p className="text-xs text-muted-foreground mb-5">
-        Nickname your cards and accounts (e.g. <span className="font-medium">visa 8943</span>,{" "}
-        <span className="font-medium">bac red</span>) to attribute and filter expenses by them.
+        {t.rich("description", { b: (chunks) => <span className="font-medium">{chunks}</span> })}
       </p>
 
       {isLoading && (
@@ -151,14 +151,14 @@ export default function PaymentSourcesPage() {
 
       {!isLoading && !error && paymentSources.length === 0 && (
         <EmptyState
-          title="No payment sources yet"
-          description="Add a card or account to start attributing expenses"
+          title={t("emptyTitle")}
+          description={t("emptyDescription")}
           action={
             <button
               onClick={() => setShowCreate(true)}
               className="text-xs text-primary underline underline-offset-4"
             >
-              Add your first source
+              {t("emptyAction")}
             </button>
           }
         />
@@ -187,7 +187,7 @@ export default function PaymentSourcesPage() {
                 <button
                   onClick={() => openEdit(source)}
                   className="text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Edit"
+                  aria-label={t("edit")}
                 >
                   <Pencil size={15} />
                 </button>
@@ -195,7 +195,7 @@ export default function PaymentSourcesPage() {
                   onClick={() => handleDelete(source.id)}
                   disabled={deletingId === source.id}
                   className="text-destructive disabled:opacity-40"
-                  aria-label="Delete"
+                  aria-label={t("delete")}
                 >
                   <Trash2 size={15} />
                 </button>
@@ -206,27 +206,27 @@ export default function PaymentSourcesPage() {
       )}
 
       {showCreate && (
-        <Dialog title="New payment source" onClose={() => setShowCreate(false)}>
+        <Dialog title={t("newSourceDialogTitle")} onClose={() => setShowCreate(false)}>
           <SourceForm
             form={createForm}
             onChange={setCreateForm}
             onSubmit={handleCreate}
             onCancel={() => setShowCreate(false)}
             isSubmitting={isCreating}
-            submitLabel="Create"
+            submitLabel={t("create")}
           />
         </Dialog>
       )}
 
       {editing && (
-        <Dialog title="Edit payment source" onClose={() => setEditing(null)}>
+        <Dialog title={t("editSourceDialogTitle")} onClose={() => setEditing(null)}>
           <SourceForm
             form={editForm}
             onChange={setEditForm}
             onSubmit={handleEdit}
             onCancel={() => setEditing(null)}
             isSubmitting={isSaving}
-            submitLabel="Save"
+            submitLabel={t("save")}
           />
         </Dialog>
       )}
@@ -267,14 +267,15 @@ function SourceForm({
   isSubmitting: boolean;
   submitLabel: string;
 }) {
-  const t = useTranslations("Common");
+  const t = useTranslations("PaymentSources");
+  const tCommon = useTranslations("Common");
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div>
-        <label className="text-xs text-muted-foreground mb-1 block">Alias</label>
+        <label className="text-xs text-muted-foreground mb-1 block">{t("alias")}</label>
         <input
           type="text"
-          placeholder="e.g. visa 8943"
+          placeholder={t("aliasPlaceholder")}
           value={form.alias}
           onChange={(e) => onChange({ ...form, alias: e.target.value })}
           maxLength={100}
@@ -284,7 +285,7 @@ function SourceForm({
       </div>
 
       <div>
-        <label className="text-xs text-muted-foreground mb-2 block">Payment method (optional)</label>
+        <label className="text-xs text-muted-foreground mb-2 block">{t("paymentMethodOptional")}</label>
         <div className="flex gap-2 flex-wrap">
           {PAYMENT_METHODS.map((m) => {
             const selected = form.paymentMethod === m.value;
@@ -302,7 +303,7 @@ function SourceForm({
                     : {}
                 }
               >
-                {t(`paymentMethods.${m.value}`)}
+                {tCommon(`paymentMethods.${m.value}`)}
               </button>
             );
           })}
@@ -310,7 +311,7 @@ function SourceForm({
       </div>
 
       <div>
-        <label className="text-xs text-muted-foreground mb-2 block">Color</label>
+        <label className="text-xs text-muted-foreground mb-2 block">{t("color")}</label>
         <div className="flex flex-wrap gap-2">
           {PRESET_COLORS.map((c) => (
             <button
@@ -330,7 +331,7 @@ function SourceForm({
             className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
             style={{ color: form.color, backgroundColor: `${form.color}20` }}
           >
-            {form.alias || "Preview"}
+            {form.alias || t("preview")}
           </span>
         </div>
       </div>
@@ -341,14 +342,14 @@ function SourceForm({
           onClick={onCancel}
           className="flex-1 border rounded-xl py-3 text-sm font-medium"
         >
-          Cancel
+          {t("cancel")}
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
           className="flex-1 bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium disabled:opacity-50"
         >
-          {isSubmitting ? "Saving…" : submitLabel}
+          {isSubmitting ? t("saving") : submitLabel}
         </button>
       </div>
     </form>
